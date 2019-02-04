@@ -7,7 +7,7 @@ This project is still in development.
 - [x] Add support for deprecation
 - [x] Add support for reusable blocks (wp_block post_type)
 - [x] Add support for server side rendered blocks registered through register_block_type
-- [ ] Add support for posts edited prior to this plugin activation
+- [x] Add support for posts edited prior to this plugin activation
 - [ ] Tests
 
 
