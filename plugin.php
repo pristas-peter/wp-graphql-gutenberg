@@ -1,7 +1,7 @@
 <?php
 /**
  * Plugin Name: WP GraphQL Gutenberg
- * Plugin URI: https://github.com/ahmadawais/create-guten-block/
+ * Plugin URI: https://github.com/pristas-peter/wp-graphql-gutenberg
  * Description: Enable blocks in WP GraphQL.
  * Author: pristas-peter
  * Author URI: 
