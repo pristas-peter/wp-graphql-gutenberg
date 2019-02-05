@@ -32,11 +32,10 @@ const TBody = styled.tbody`
 `;
 
 const TRow = styled.tr`
-    
 `;
 
 const TData = styled.td`
-    
+    padding: 0 15px;
 `;
 
 
@@ -52,10 +51,6 @@ class Admin extends Component {
 
     updatePromises;
 
-    componentDidMount() {
-        window.wpGraphqlGutenbergAdmin = this;
-    }
-
     onUpdate = () => {
         const {noticeOperations: {createErrorNotice, createNotice}} = this.props;
 
@@ -69,10 +64,11 @@ class Admin extends Component {
                     return Promise.all(ids.map((id, i) => new Promise((resolve, reject) => {
                         const next = () => {
                             const iframe = document.createElement('iframe');
+                            iframe.wpGraphqlGutenbergAdmin = this;
                             iframe.setAttribute('style', 'display: none;');
                             iframe.setAttribute('src', `/wp-admin/post.php?post=${id}&action=edit&wpGraphqlGutenbergForceUpdate`);
+                            
                             document.body.appendChild(iframe);
-       
                             this.updatePromises.set(iframe, {resolve, reject});
                         };
                         

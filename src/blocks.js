@@ -111,24 +111,21 @@ wp.domReady(() => {
     
         if (shouldForceUpdate()) {
             editorReady(() => {
-                const admin = window.parent.wpGraphqlGutenbergAdmin;
+                const iframe = window.frameElement;
+                const admin = iframe && window.frameElement.wpGraphqlGutenbergAdmin;
     
                 const {id, content} =  wp.data.select("core/editor").getCurrentPost();
                 const restBase = getPostTypeRestBase();
     
-                if (!restBase) {
-                    onFailure(new Error(__('Could not detect post type\' rest base.', 'wp-graphql-gutenberg')));
-                } else {
-                    const promise = wp.apiFetch({
-                        path: `/wp/v2/${restBase}/${id}`,
-                        method: 'PUT',
-                        data: {
-                            content,
-                        }});
-                    
-                    if (admin) {
-                        admin.handleUpdatePromise(window.frameElement, promise);
-                    }
+                const promise = restBase ? wp.apiFetch({
+                    path: `/wp/v2/${restBase}/${id}`,
+                    method: 'PUT',
+                    data: {
+                        content,
+                    }}) : Promise.reject(new Error(__('Could not detect post type\' rest base.', 'wp-graphql-gutenberg')));
+                
+                if (admin) {
+                    admin.handleUpdatePromise(iframe, promise);
                 }
             });
         }
