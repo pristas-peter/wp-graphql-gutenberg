@@ -99,11 +99,11 @@ if ( ! class_exists( 'WPGraphQLGutenberg' ) ) {
 			return $this->graphql_block_interface_type;
 		}
 
-		protected function generate_graphql_attributes_fields($attributes) {
+		protected function generate_graphql_attributes_fields($attributes, $block_type_name) {
 			$fields = [];
 
 			foreach($attributes as $attribute_name => $attribute) {
-				$type;
+				$type = NULL;
 
 				switch ($attribute['type']) {
 					case 'string':
@@ -132,7 +132,7 @@ if ( ! class_exists( 'WPGraphQLGutenberg' ) ) {
 						'type' => $type,
 					];
 				} else if (WP_DEBUG) {
-					trigger_error('Could not determine type of attribute "' . $attribute_name . '" in "' . $name . '" block type.', E_USER_WARNING);
+					// trigger_error('Could not determine type of attribute "' . $attribute_name . '" in "' . $block_type_name . '" block type.', E_USER_WARNING);
 				}
 			}
 
@@ -185,7 +185,7 @@ if ( ! class_exists( 'WPGraphQLGutenberg' ) ) {
 				}
 
 				
-				$current_fields = $this->generate_graphql_attributes_fields($version);
+				$current_fields = $this->generate_graphql_attributes_fields($version, $block_type['name']);
 
 				$fields = array_merge(
 					isset($previous_version_fields) ? $previous_version_fields : [],
