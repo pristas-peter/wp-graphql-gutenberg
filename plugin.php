@@ -192,8 +192,6 @@ if ( ! class_exists( 'WPGraphQLGutenberg' ) ) {
 					$current_fields
 				);
 
-				$version_name;
-
 				if ($has_breaking_change || $is_current_version) {
 					$version_name = self::format_graphql_attributes_type_name($prefix);
 					
@@ -204,7 +202,7 @@ if ( ! class_exists( 'WPGraphQLGutenberg' ) ) {
 					}
 				}
 
-				if ($has_breaking_change && !$is_current_version) {
+				if ($has_breaking_change && !$is_current_version && count($previous_version_fields)) {
 					array_push($configs, [
 						'name' => $version_name,
 						'fields' => $previous_version_fields
@@ -222,7 +220,7 @@ if ( ! class_exists( 'WPGraphQLGutenberg' ) ) {
 					}
 				}
 
-				if ($is_current_version) {
+				if ($is_current_version && count($fields)) {
 					array_push($configs, [
 						'name' => $version_name,
 						'fields' => $fields
