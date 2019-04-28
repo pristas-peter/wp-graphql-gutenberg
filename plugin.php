@@ -336,8 +336,13 @@ if ( ! class_exists( 'WPGraphQLGutenberg' ) ) {
 			}
 		}
 
-		private function set_block_attributes_typename(&$block, $block_type) {
-			$block['attributes']['__typename'] = $this->get_latest_attributes_type_typename($block_type);
+		private function set_block_attributes_typename(&$block, &$block_types_per_name) {
+			$block['attributes']['__typename'] = $this->get_latest_attributes_type_typename($block_types_per_name[$block['name']]);
+
+			foreach ($block['innerBlocks'] as &$inner_block) {
+				$this->set_block_attributes_typename($inner_block, $block_types_per_name);
+			}
+
 		}
 
         protected function setup_rest() {
@@ -367,7 +372,7 @@ if ( ! class_exists( 'WPGraphQLGutenberg' ) ) {
 							$post_content_blocks = $value['post_content_blocks'];
 							
 							foreach($post_content_blocks as &$block) {
-								$this->set_block_attributes_typename($block, $block_types_per_name[$block['name']]);
+								$this->set_block_attributes_typename($block, $block_types_per_name);
 							}
 
                             $ret = update_post_meta($post->ID, WPGraphQLGutenberg::$field_name, $post_content_blocks);
@@ -380,7 +385,7 @@ if ( ! class_exists( 'WPGraphQLGutenberg' ) ) {
 							}
 
 							foreach($value['reusable_blocks'] as $id => $block) {
-								$this->set_block_attributes_typename($block, $block_types_per_name[$block['name']]);
+								$this->set_block_attributes_typename($block, $block_types_per_name);
 
 								$ret = update_post_meta($id, WPGraphQLGutenberg::$field_name, $block);
 
