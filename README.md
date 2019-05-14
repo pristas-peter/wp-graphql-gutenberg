@@ -3,8 +3,6 @@
 
 ## What’s Included?
 
-Your environment will have everything you need to build a modern next-gen WordPress Gutenberg plugin:
-
 * Supports post_types that return `true` for `use_block_editor_for_post_type` and are allowed through wp-graphql
 * Supports blocks `deprecation`.
 * Supports reusable blocks (`wp_block` post_type)
