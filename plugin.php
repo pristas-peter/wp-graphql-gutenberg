@@ -30,7 +30,6 @@ require_once(ABSPATH . 'wp-admin/includes/admin.php');
 
 if ( ! class_exists( 'WPGraphQLGutenberg' ) ) {
     final class WPGraphQLGutenberg {
-		private static $filter_prefix = 'graphql_gutenberg_';
 		private static $field_name = 'wp_graphql_gutenberg';
 		private static $block_types_option_name = 'wp_graphql_gutenberg_block_types';
         private static $block_editor_script_name = 'wp-graphql-gutenberg-script';
@@ -235,7 +234,16 @@ if ( ! class_exists( 'WPGraphQLGutenberg' ) ) {
 				if ($has_breaking_change && !$is_current_version && count($previous_version_fields)) {
 					array_push($configs, [
 						'name' => $version_name,
-						'fields' => apply_filters(self::$filter_prefix . 'block_attributes_fields', $previous_version_fields, $version_name, $version, $block_type),
+						/**
+						 * graphql_gutenberg_block_attributes_fields
+						 * Filters the fields for block attributes type.
+						 *
+						 * @param object    $fields           Fields config.
+						 * @param string    $type_name        GraphQL type name.
+						 * @param array     $attributes 	  Block type attributes definition.
+						 * @param array     $block_type 	  Block type definition.
+						 */
+						'fields' => apply_filters('graphql_gutenberg_block_attributes_fields', $previous_version_fields, $version_name, $version, $block_type),
 					]);
 				}
 
@@ -253,7 +261,7 @@ if ( ! class_exists( 'WPGraphQLGutenberg' ) ) {
 				if ($is_current_version && count($fields)) {
 					array_push($configs, [
 						'name' => $version_name,
-						'fields' => apply_filters(self::$filter_prefix . 'block_attributes_fields', $fields, $version_name, $version, $block_type)
+						'fields' => apply_filters('graphql_gutenberg_block_attributes_fields', $fields, $version_name, $version, $block_type)
 					]);
 				}
 
@@ -317,8 +325,14 @@ if ( ! class_exists( 'WPGraphQLGutenberg' ) ) {
 							'description' => __('Server side rendered content.', 'wp-graphql-gutenberg')
 						];
 					}
-
-					return apply_filters(self::$filter_prefix . 'block_type_fields', $fields, $block_type);
+						/**
+						 * graphql_gutenberg_block_type_fields
+						 * Filters the fields for block type.
+						 *
+						 * @param object    $fields           Fields config.
+						 * @param array     $block_type 	  Block type definition.
+						 */
+					return apply_filters('graphql_gutenberg_block_type_fields', $fields, $block_type);
 				},
 				'description' => $block_type['name'] . ' block',
 				'interfaces' => function() {
@@ -372,8 +386,14 @@ if ( ! class_exists( 'WPGraphQLGutenberg' ) ) {
 			$block['innerBlocks'] = array_map(function (&$inner_block) use(&$block_types_per_name) {
 				return $this->prepare_block($inner_block, $block_types_per_name);
 			}, $block['innerBlocks']);
-
-			return apply_filters(self::$filter_prefix . 'prepare_block', $block, $block_types_per_name);
+			/**
+			 * graphql_gutenberg_prepare_block
+			 * Filters block data before saving to post meta.
+			 *
+			 * @param object    $data             		Data.
+			 * @param array     $block_types_per_name 	GraphQL types named array for blocks.
+			 */
+			return apply_filters('graphql_gutenberg_prepare_block', $block, $block_types_per_name);
 		}
 
         protected function setup_rest() {
@@ -505,7 +525,13 @@ if ( ! class_exists( 'WPGraphQLGutenberg' ) ) {
 				}
 
 				foreach($this->get_graphql_block_type_per_block_name() as $name => $block_type) {
-					array_push($config['types'], apply_filters(self::$filter_prefix . 'register_block_type', $block_type));
+					/**
+					 * graphql_gutenberg_register_block_type
+					 * Filters block type graphql config.
+					 *
+					 * @param object    $block_type             GraphQL type for block type.
+					 */
+					array_push($config['types'], apply_filters('graphql_gutenberg_register_block_type', $block_type));
 				}
 
 				return $config;
