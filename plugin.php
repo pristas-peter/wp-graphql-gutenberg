@@ -5,7 +5,7 @@
  * Description: Enable blocks in WP GraphQL.
  * Author: pristas-peter
  * Author URI: 
- * Version: 0.0.1
+ * Version: 0.0.2
  * License: MIT
  * License URI: https://opensource.org/licenses/MIT
  *
@@ -13,11 +13,9 @@
 
 
 namespace WPGraphQLGutenberg;
-use WPGraphQL\WPSchema;
-use GraphQL\Type\Definition\UnionType;
-use GraphQL\Type\Definition\ObjectType;
 use GraphQL\Type\Definition\InterfaceType;
 use GraphQL\Type\Definition\Type;
+use GraphQL\Type\Definition\CustomScalarType;
 use WPGraphQL\TypeRegistry;
 use \WP_Block_Type_Registry;
 use \WP_Error;
@@ -30,16 +28,19 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 require_once(ABSPATH . 'wp-admin/includes/admin.php');
 
-
 if ( ! class_exists( 'WPGraphQLGutenberg' ) ) {
     final class WPGraphQLGutenberg {
+		private static $filter_prefix = 'graphql_gutenberg_';
 		private static $field_name = 'wp_graphql_gutenberg';
 		private static $block_types_option_name = 'wp_graphql_gutenberg_block_types';
         private static $block_editor_script_name = 'wp-graphql-gutenberg-script';
         private static $block_editor_script_file = 'dist/blocks.build.js';
-		private static $instance;
 		
-        public static function instance() {
+		private static $attributes_object_type;
+		private static $attributes_array_type;
+
+		private static $instance;		
+		public static function instance() {
 			if ( ! isset( self::$instance ) ) {
 				self::$instance = new WPGraphQLGutenberg();
 			}
@@ -47,13 +48,39 @@ if ( ! class_exists( 'WPGraphQLGutenberg' ) ) {
 			return self::$instance;
 		}
 
-		protected static function format_graphql_block_type_name($block_name) {
+		public static function get_attributes_object_type() {
+			if ( ! isset( self::$attributes_object_type ) ) {
+				self::$attributes_object_type = new CustomScalarType([
+					'name' => 'BlockAttributesObject',
+					'serialize' => function($value) {
+						return json_encode($value);
+					},
+				]);
+			}
+
+			return self::$attributes_object_type;
+		}
+
+		public static function get_attributes_array_type() {
+			if ( ! isset( self::$attributes_array_type ) ) {
+				self::$attributes_array_type = new CustomScalarType([
+					'name' => 'BlockAttributesArray',
+					'serialize' => function($value) {
+						return json_encode($value);
+					},
+				]);
+			}
+
+			return self::$attributes_array_type;
+		}
+
+		public static function format_graphql_block_type_name($block_name) {
 			return implode(array_map(function($val) {
 				return ucfirst($val);
 			}, preg_split("/(\/|\?|_|=|-)/", $block_name . 'Block')));
 		}
 
-		protected static function format_graphql_attributes_type_name($prefix) {
+		public static function format_graphql_attributes_type_name($prefix) {
 			return $prefix . 'Attributes';
 		}
 
@@ -119,7 +146,10 @@ if ( ! class_exists( 'WPGraphQLGutenberg' ) ) {
 						$type = Type::int();
 						break;
 					case 'array':
-						$type = Type::listOf(Type::nonNull(Type::string()));
+						$type = self::get_attributes_array_type();
+						break;
+					case 'object':
+						$type = self::get_attributes_object_type();
 						break;
 				}
 
@@ -132,7 +162,7 @@ if ( ! class_exists( 'WPGraphQLGutenberg' ) ) {
 						'type' => $type,
 					];
 				} else if (WP_DEBUG) {
-					// trigger_error('Could not determine type of attribute "' . $attribute_name . '" in "' . $block_type_name . '" block type.', E_USER_WARNING);
+					trigger_error('Could not determine type of attribute "' . $attribute_name . '" in "' . $block_type_name . '" block type.', E_USER_WARNING);
 				}
 			}
 
@@ -205,7 +235,7 @@ if ( ! class_exists( 'WPGraphQLGutenberg' ) ) {
 				if ($has_breaking_change && !$is_current_version && count($previous_version_fields)) {
 					array_push($configs, [
 						'name' => $version_name,
-						'fields' => $previous_version_fields
+						'fields' => apply_filters(self::$filter_prefix . 'block_attributes_fields', $previous_version_fields, $version_name, $version, $block_type),
 					]);
 				}
 
@@ -223,7 +253,7 @@ if ( ! class_exists( 'WPGraphQLGutenberg' ) ) {
 				if ($is_current_version && count($fields)) {
 					array_push($configs, [
 						'name' => $version_name,
-						'fields' => $fields
+						'fields' => apply_filters(self::$filter_prefix . 'block_attributes_fields', $fields, $version_name, $version, $block_type)
 					]);
 				}
 
@@ -288,7 +318,7 @@ if ( ! class_exists( 'WPGraphQLGutenberg' ) ) {
 						];
 					}
 
-					return $fields;
+					return apply_filters(self::$filter_prefix . 'block_type_fields', $fields, $block_type);
 				},
 				'description' => $block_type['name'] . ' block',
 				'interfaces' => function() {
@@ -336,13 +366,14 @@ if ( ! class_exists( 'WPGraphQLGutenberg' ) ) {
 			}
 		}
 
-		private function set_block_attributes_typename(&$block, &$block_types_per_name) {
+		private function prepare_block(&$block, &$block_types_per_name) {
 			$block['attributes']['__typename'] = $this->get_latest_attributes_type_typename($block_types_per_name[$block['name']]);
 
-			foreach ($block['innerBlocks'] as &$inner_block) {
-				$this->set_block_attributes_typename($inner_block, $block_types_per_name);
-			}
+			$block['innerBlocks'] = array_map(function (&$inner_block) use(&$block_types_per_name) {
+				return $this->prepare_block($inner_block, $block_types_per_name);
+			}, $block['innerBlocks']);
 
+			return apply_filters(self::$filter_prefix . 'prepare_block', $block, $block_types_per_name);
 		}
 
         protected function setup_rest() {
@@ -369,12 +400,10 @@ if ( ! class_exists( 'WPGraphQLGutenberg' ) ) {
 								return $arr;
 							}, []);
 							
-							$post_content_blocks = $value['post_content_blocks'];
+							$post_content_blocks = array_map(function (&$block) use(&$block_types_per_name) {
+								return $this->prepare_block($block, $block_types_per_name);
+							}, $value['post_content_blocks']);
 							
-							foreach($post_content_blocks as &$block) {
-								$this->set_block_attributes_typename($block, $block_types_per_name);
-							}
-
                             $ret = update_post_meta($post->ID, WPGraphQLGutenberg::$field_name, $post_content_blocks);
                             if ( false === $ret ) {
                                 return new WP_Error(
@@ -385,9 +414,7 @@ if ( ! class_exists( 'WPGraphQLGutenberg' ) ) {
 							}
 
 							foreach($value['reusable_blocks'] as $id => $block) {
-								$this->set_block_attributes_typename($block, $block_types_per_name);
-
-								$ret = update_post_meta($id, WPGraphQLGutenberg::$field_name, $block);
+								$ret = update_post_meta($id, WPGraphQLGutenberg::$field_name, $this->prepare_block($block, $block_types_per_name));
 
 								if ( false === $ret ) {
 									return new WP_Error(
@@ -478,11 +505,13 @@ if ( ! class_exists( 'WPGraphQLGutenberg' ) ) {
 				}
 
 				foreach($this->get_graphql_block_type_per_block_name() as $name => $block_type) {
-					array_push($config['types'], $block_type);
+					array_push($config['types'], apply_filters(self::$filter_prefix . 'register_block_type', $block_type));
 				}
 
 				return $config;
 			});
+
+
 		}
 
 		protected function setup_admin() {
@@ -526,108 +555,3 @@ add_action('init', function() {
     WPGraphQLGutenberg::instance()->setup();
 });
 
-
-// /**
-//  * Enqueue block JavaScript and CSS for the editor
-//  */
-// function my_block_plugin_editor_scripts() {
-	
-//     // Enqueue block editor JS
-//     wp_enqueue_script(
-//         'my-block-editor-js',
-//         plugins_url( '/blocks/custom-block/index.js', __FILE__ ),
-//         [ 'wp-blocks', 'wp-element', 'wp-components', 'wp-i18n' ],
-//         filemtime( plugin_dir_path( __FILE__ ) . 'blocks/custom-block/index.js' )	
-//     );
-
-//     // Enqueue block editor styles
-//     wp_enqueue_style(
-//         'my-block-editor-css',
-//         plugins_url( '/blocks/custom-block/editor-styles.css', __FILE__ ),
-//         [ 'wp-blocks' ],
-//         filemtime( plugin_dir_path( __FILE__ ) . 'blocks/custom-block/editor-styles.css' )	
-//     );
-
-// }
-
-// // Hook the enqueue functions into the editor
-// add_action( 'enqueue_block_editor_assets', 'my_block_plugin_editor_scripts' );
-
-// /**
-//  * Enqueue frontend and editor JavaScript and CSS
-//  */
-// function my_block_plugin_scripts() {
-	
-//     // Enqueue block JS
-//     wp_enqueue_script(
-//         'my-block-js',
-//         plugins_url( '/blocks/custom-block/scripts.js', __FILE__ ),
-//         [ 'wp-blocks', 'wp-element', 'wp-components', 'wp-i18n' ],
-//         filemtime( plugin_dir_path( __FILE__ ) . 'blocks/custom-block/scripts.js' )	
-//     );
-
-//     // Enqueue block editor styles
-//     wp_enqueue_style(
-//         'my-block-css',
-//         plugins_url( '/blocks/custom-block/styles.css', __FILE__ ),
-//         [ 'wp-blocks' ],
-//         filemtime( plugin_dir_path( __FILE__ ) . 'blocks/custom-block/styles.css' )	
-//     );
-
-// }
-
-// // Hook the enqueue functions into the frontend and editor
-// add_action( 'enqueue_block_assets', 'my_block_plugin_scripts' );
-
-
-
-
-// /**
-//  * Enqueue Gutenberg block assets for both frontend + backend.
-//  *
-//  * @uses {wp-editor} for WP editor styles.
-//  * @since 1.0.0
-//  */
-// function wp_graphql_gutenberg_cgb_block_assets() { // phpcs:ignore
-// 	// Styles.
-// 	wp_enqueue_style(
-// 		'wp_graphql_gutenberg-cgb-style-css', // Handle.
-// 		plugins_url( 'dist/blocks.style.build.css', dirname( __FILE__ ) ), // Block style CSS.
-// 		array( 'wp-editor' ) // Dependency to include the CSS after it.
-// 		// filemtime( plugin_dir_path( __DIR__ ) . 'dist/blocks.style.build.css' ) // Version: File modification time.
-// 	);
-// }
-
-// // Hook: Frontend assets.
-// add_action( 'enqueue_block_assets', 'wp_graphql_gutenberg_cgb_block_assets' );
-
-// /**
-//  * Enqueue Gutenberg block assets for backend editor.
-//  *
-//  * @uses {wp-blocks} for block type registration & related functions.
-//  * @uses {wp-element} for WP Element abstraction — structure of blocks.
-//  * @uses {wp-i18n} to internationalize the block's text.
-//  * @uses {wp-editor} for WP editor styles.
-//  * @since 1.0.0
-//  */
-// function wp_graphql_gutenberg_cgb_editor_assets() { // phpcs:ignore
-// 	// Scripts.
-// 	wp_enqueue_script(
-// 		'wp_graphql_gutenberg-cgb-block-js', // Handle.
-// 		plugins_url( '/dist/blocks.build.js', dirname( __FILE__ ) ), // Block.build.js: We register the block here. Built with Webpack.
-// 		array( 'wp-blocks', 'wp-i18n', 'wp-element', 'wp-editor' ), // Dependencies, defined above.
-// 		// filemtime( plugin_dir_path( __DIR__ ) . 'dist/blocks.build.js' ), // Version: File modification time.
-// 		true // Enqueue the script in the footer.
-// 	);
-
-// 	// Styles.
-// 	wp_enqueue_style(
-// 		'wp_graphql_gutenberg-cgb-block-editor-css', // Handle.
-// 		plugins_url( 'dist/blocks.editor.build.css', dirname( __FILE__ ) ), // Block editor CSS.
-// 		array( 'wp-edit-blocks' ) // Dependency to include the CSS after it.
-// 		// filemtime( plugin_dir_path( __DIR__ ) . 'dist/blocks.editor.build.css' ) // Version: File modification time.
-// 	);
-// }
-
-// // Hook: Editor assets.
-// add_action( 'enqueue_block_editor_assets', 'wp_graphql_gutenberg_cgb_editor_assets' );
