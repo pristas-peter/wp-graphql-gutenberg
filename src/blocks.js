@@ -1,6 +1,7 @@
 import Admin from './admin';
 
-const {__} = wp.i18n;
+const { __ } = wp.i18n;
+
 
 function getBlockTypesForSerialization() {
     return wp.blocks.getBlockTypes().map(blockType => lodash.omit(blockType, ['transforms', 'icon']));
@@ -13,7 +14,7 @@ function getReusableBlocks(blocks, obj = {}) {
         if (block.name === 'core/block') {
             const id = block.attributes.ref;
 
-            promises.push(wp.apiFetch({path: `/wp/v2/blocks/${id}`})
+            promises.push(wp.apiFetch({ path: `/wp/v2/blocks/${id}` })
                 .then(wp_block => {
                     obj[id] = wp.blocks.parse(wp_block.content.raw).pop();
                 }));
@@ -48,7 +49,7 @@ function isEditorUpdateRequest(options) {
         const regexp = new RegExp(`^\/wp\/v2\/${restBase}\/`);
         return regexp.test(options.path) && options.method === 'PUT';
     }
-    
+
     return false;
 }
 
@@ -58,9 +59,9 @@ function shouldForceUpdate() {
 
 function editorReady(cb) {
     let interval;
-    
+
     const intervalCb = () => {
-        const {id} = wp.data.select("core/editor").getCurrentPost() || {};
+        const { id } = wp.data.select("core/editor").getCurrentPost() || {};
 
         if (id) {
             if (interval) {
@@ -86,44 +87,45 @@ wp.domReady(() => {
         wp.element.render(<Admin />, admin);
 
     } else {
-        wp.apiFetch.use( ( options, next ) => {
+        wp.apiFetch.use((options, next) => {
             if (isEditorUpdateRequest(options)) {
                 if (options.data.content) {
                     const post_content_blocks = wp.blocks.parse(options.data.content);
-        
+
                     return getReusableBlocks(post_content_blocks)
                         .then(reusable_blocks => {
                             Object.assign(options.data, {
                                 wp_graphql_gutenberg: {
-                                    post_content_blocks,
-                                    reusable_blocks,
+                                    post_content_blocks: wp.hooks.applyFilters('wpGraphqlGutenberg.postContentBlocks', post_content_blocks),
+                                    reusable_blocks: wp.hooks.applyFilters('wpGraphqlGutenberg.reusableBlocks', reusable_blocks),
                                     block_types: getBlockTypesForSerialization(),
                                 },
                             });
-        
+
                             return next(options);
                         });
                 }
             }
-            
+
             return next(options);
         });
-    
+
         if (shouldForceUpdate()) {
             editorReady(() => {
                 const iframe = window.frameElement;
                 const admin = iframe && window.frameElement.wpGraphqlGutenbergAdmin;
-    
-                const {id, content} =  wp.data.select("core/editor").getCurrentPost();
+
+                const { id, content } = wp.data.select("core/editor").getCurrentPost();
                 const restBase = getPostTypeRestBase();
-    
+
                 const promise = restBase ? wp.apiFetch({
                     path: `/wp/v2/${restBase}/${id}`,
                     method: 'PUT',
                     data: {
                         content,
-                    }}) : Promise.reject(new Error(__('Could not detect post type\' rest base.', 'wp-graphql-gutenberg')));
-                
+                    }
+                }) : Promise.reject(new Error(__('Could not detect post type\' rest base.', 'wp-graphql-gutenberg')));
+
                 if (admin) {
                     admin.handleUpdatePromise(iframe, promise);
                 }
@@ -131,3 +133,12 @@ wp.domReady(() => {
         }
     }
 });
+
+// wp.hooks.addFilter('editor.BlockEdit', 'wpGraphlGutenberg.BlockEdit', Edit => {
+//     return props => {
+//         return <Edit {...props} setAttributes={(attributes) => {
+//             wp.hooks.doAction('wpGraphlGutenberg.onSetAttributes', props, attributes);
+//             return props.setAttributes(attributes);
+//         }} />;
+//     }
+// });

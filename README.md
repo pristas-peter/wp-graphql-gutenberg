@@ -92,6 +92,8 @@ query posts {
 
 ### 👉  `WP Filters`
 
+#### PHP
+
 ```php
 graphql_gutenberg_block_attributes_fields
   
@@ -124,6 +126,23 @@ graphql_gutenberg_register_block_type
 */
 
 ```
+
+#### JS
+
+``` js
+wpGraphqlGutenberg.postContentBlocks
+/* Filters post_content_blocks field in PUT request.
+*
+* @param array    postContentBlocks
+*/
+
+wpGraphqlGutenberg.reusableBlocks
+/* Filters reusable_blocks field in PUT request.
+*
+* @param array    reusableBlocks
+*/
+```
+
 
 ### 👉  `Need support for ACF blocks (PRO version)?`
 
