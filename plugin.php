@@ -76,7 +76,7 @@ if ( ! class_exists( 'WPGraphQLGutenberg' ) ) {
 		public static function format_graphql_block_type_name($block_name) {
 			return implode(array_map(function($val) {
 				return ucfirst($val);
-			}, preg_split("/(\/|\?|_|=|-)/", $block_name . 'Block')));
+			}, preg_split("/(\/|\?|_|=|-)/", $block_name))) . 'Block';
 		}
 
 		public static function format_graphql_attributes_type_name($prefix) {
@@ -238,7 +238,7 @@ if ( ! class_exists( 'WPGraphQLGutenberg' ) ) {
 						 * graphql_gutenberg_block_attributes_fields
 						 * Filters the fields for block attributes type.
 						 *
-						 * @param object    $fields           Fields config.
+						 * @param array     $fields           Fields config.
 						 * @param string    $type_name        GraphQL type name.
 						 * @param array     $attributes 	  Block type attributes definition.
 						 * @param array     $block_type 	  Block type definition.
@@ -329,7 +329,7 @@ if ( ! class_exists( 'WPGraphQLGutenberg' ) ) {
 						 * graphql_gutenberg_block_type_fields
 						 * Filters the fields for block type.
 						 *
-						 * @param object    $fields           Fields config.
+						 * @param array    $fields           Fields config.
 						 * @param array     $block_type 	  Block type definition.
 						 */
 					return apply_filters('graphql_gutenberg_block_type_fields', $fields, $block_type);
@@ -390,7 +390,7 @@ if ( ! class_exists( 'WPGraphQLGutenberg' ) ) {
 			 * graphql_gutenberg_prepare_block
 			 * Filters block data before saving to post meta.
 			 *
-			 * @param object    $data             		Data.
+			 * @param array    $data             		Data.
 			 * @param array     $block_types_per_name 	GraphQL types named array for blocks.
 			 */
 			return apply_filters('graphql_gutenberg_prepare_block', $block, $block_types_per_name);
@@ -498,7 +498,9 @@ if ( ! class_exists( 'WPGraphQLGutenberg' ) ) {
 			add_action('graphql_register_types', function () {
 				foreach($this->get_editor_post_types() as $post_type) {
 					if (array_search($post_type, \WPGraphQL::$allowed_post_types, true)) {
-						register_graphql_field( $post_type, 'blocks', [
+
+
+						register_graphql_field( get_post_type_object($post_type)->graphql_single_name, 'blocks', [
 							'type' => Type::listOf($this->get_graphql_block_interface_type()),
 							'description' => 'Gutenberg blocks',
 							'resolve' => function( $post ) {
@@ -529,7 +531,7 @@ if ( ! class_exists( 'WPGraphQLGutenberg' ) ) {
 					 * graphql_gutenberg_register_block_type
 					 * Filters block type graphql config.
 					 *
-					 * @param object    $block_type             GraphQL type for block type.
+					 * @param array    $block_type             GraphQL type for block type.
 					 */
 					array_push($config['types'], apply_filters('graphql_gutenberg_register_block_type', $block_type));
 				}
