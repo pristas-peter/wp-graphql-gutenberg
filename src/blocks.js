@@ -2,7 +2,6 @@ import Admin from './admin';
 
 const { __ } = wp.i18n;
 
-
 function getBlockTypesForSerialization() {
     return wp.blocks.getBlockTypes().map(blockType => lodash.omit(blockType, ['transforms', 'icon']));
 }
@@ -30,7 +29,8 @@ function getReusableBlocks(blocks, obj = {}) {
 
 
 function getPostTypeRestBase() {
-    const currentPostType = wp.data.select("core/editor").getCurrentPostType();
+    const registry = wp.data && wp.data.select("core/editor");
+    const currentPostType = registry && registry.getCurrentPostType();
 
     if (currentPostType) {
         const postType = wp.data.select("core").getPostType(currentPostType);
@@ -80,6 +80,22 @@ function editorReady(cb) {
     }
 }
 
+function prepareData(post_content_blocks) {
+    return getReusableBlocks(post_content_blocks)
+    .then(reusable_blocks => {
+        return {
+            post_content_blocks: wp.hooks.applyFilters('wpGraphqlGutenberg.postContentBlocks', post_content_blocks),
+            reusable_blocks: wp.hooks.applyFilters('wpGraphqlGutenberg.reusableBlocks', reusable_blocks),
+        };
+    });
+}
+
+wp.wpGraphqlGutenberg = {
+    prepareData,
+    getReusableBlocks,
+    getBlockTypesForSerialization,
+}
+
 wp.domReady(() => {
     const admin = document.getElementById('wp-graphql-gutenberg-admin');
 
@@ -90,20 +106,16 @@ wp.domReady(() => {
         wp.apiFetch.use((options, next) => {
             if (isEditorUpdateRequest(options)) {
                 if (options.data.content) {
-                    const post_content_blocks = wp.blocks.parse(options.data.content);
-
-                    return getReusableBlocks(post_content_blocks)
-                        .then(reusable_blocks => {
-                            Object.assign(options.data, {
-                                wp_graphql_gutenberg: {
-                                    post_content_blocks: wp.hooks.applyFilters('wpGraphqlGutenberg.postContentBlocks', post_content_blocks),
-                                    reusable_blocks: wp.hooks.applyFilters('wpGraphqlGutenberg.reusableBlocks', reusable_blocks),
-                                    block_types: getBlockTypesForSerialization(),
-                                },
-                            });
-
-                            return next(options);
+                    return prepareData(wp.blocks.parse(options.data.content)).then(data => {
+                        Object.assign(options.data, {
+                            wp_graphql_gutenberg: {
+                                ...data,
+                                block_types: getBlockTypesForSerialization(),
+                            },
                         });
+
+                        return next(options);
+                    });
                 }
             }
 
@@ -133,12 +145,3 @@ wp.domReady(() => {
         }
     }
 });
-
-// wp.hooks.addFilter('editor.BlockEdit', 'wpGraphlGutenberg.BlockEdit', Edit => {
-//     return props => {
-//         return <Edit {...props} setAttributes={(attributes) => {
-//             wp.hooks.doAction('wpGraphlGutenberg.onSetAttributes', props, attributes);
-//             return props.setAttributes(attributes);
-//         }} />;
-//     }
-// });
