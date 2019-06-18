@@ -415,36 +415,41 @@ if ( ! class_exists( 'WPGraphQLGutenberg' ) ) {
                                 );
 							}
 
-							$block_types_per_name = array_reduce($block_types, function(&$arr, $block_type) {
-								$arr[$block_type['name']] = $block_type;
-								return $arr;
-							}, []);
-							
-							$post_content_blocks = array_map(function (&$block) use(&$block_types_per_name) {
-								return $this->prepare_block($block, $block_types_per_name);
-							}, $value['post_content_blocks']);
-							
-                            $ret = update_post_meta($post->ID, WPGraphQLGutenberg::$field_name, $post_content_blocks);
-                            if ( false === $ret ) {
-                                return new WP_Error(
-                                'wp_graphql_gutenberg_post_content_update_failed',
-                                __( 'Failed to update post content blocks meta field.' ),
-                                array( 'status' => 500 )
-                                );
-							}
+							if (isset($value['post_content_blocks']) || isset($value['reusable_blocks'])) {
+								$block_types_per_name = array_reduce($block_types, function(&$arr, $block_type) {
+									$arr[$block_type['name']] = $block_type;
+									return $arr;
+								}, []);
 
-							foreach($value['reusable_blocks'] as $id => $block) {
-								$ret = update_post_meta($id, WPGraphQLGutenberg::$field_name, $this->prepare_block($block, $block_types_per_name));
+								if (isset($value['post_content_blocks'])) {
+									$post_content_blocks = array_map(function (&$block) use(&$block_types_per_name) {
+										return $this->prepare_block($block, $block_types_per_name);
+									}, $value['post_content_blocks']);
+									
+									$ret = update_post_meta($post->ID, WPGraphQLGutenberg::$field_name, $post_content_blocks);
+									if ( false === $ret ) {
+										return new WP_Error(
+										'wp_graphql_gutenberg_post_content_update_failed',
+										__( 'Failed to update post content blocks meta field.' ),
+										array( 'status' => 500 )
+										);
+									}
+								}
 
-								if ( false === $ret ) {
-									return new WP_Error(
-									'wp_graphql_gutenberg_wp_block_update_failed',
-									sprintf(__( 'Failed to update reusable block meta field for wp_block %d.' ), $id),
-									array( 'status' => 500 )
-									);
+								if (isset($value['reusable_blocks'])) {
+									foreach($value['reusable_blocks'] as $id => $block) {
+										$ret = update_post_meta($id, WPGraphQLGutenberg::$field_name, $this->prepare_block($block, $block_types_per_name));
+		
+										if ( false === $ret ) {
+											return new WP_Error(
+											'wp_graphql_gutenberg_wp_block_update_failed',
+											sprintf(__( 'Failed to update reusable block meta field for wp_block %d.' ), $id),
+											array( 'status' => 500 )
+											);
+										}
+									}
 								}
 							}
-
                             return true;
 						},
 						'permission_callback' => function () {
@@ -482,7 +487,41 @@ if ( ! class_exists( 'WPGraphQLGutenberg' ) ) {
 					]
 				));
             });
-        }
+		}
+		
+		protected function get_json_data_blocks($data) {
+			$block_types = get_option(WPGraphQLGutenberg::$block_types_option_name);
+
+			$block_types_per_name = array_reduce($block_types, function(&$arr, $block_type) {
+				$arr[$block_type['name']] = $block_type;
+				return $arr;
+			}, []);
+
+			if (isset($data['reusable_blocks'])) {
+				foreach($data['reusable_blocks'] as $id => $block) {
+					$ret = update_post_meta($id, WPGraphQLGutenberg::$field_name, $this->prepare_block($block, $block_types_per_name));
+
+					if ( false === $ret ) {
+						throw new \GraphQL\Error\ClientAware(sprintf(__( 'Failed to update reusable block meta field for wp_block %d.' ), $id));
+					}
+				}
+			}
+
+			return array_map(function (&$block) use(&$block_types_per_name) {
+				return $this->prepare_block($block, $block_types_per_name);
+			}, $data['post_content_blocks']);
+		}
+
+		protected function resolve_blocks($blocks) {
+			return array_map(function($block) {
+				if ($block['name'] === 'core/block') {
+					$id = $block['attributes']['ref'];
+					return get_post_meta($id, self::$field_name, true);
+				}
+
+				return $block;
+			}, is_array($blocks) ? $blocks : []);
+		}
 
         protected function setup_block_editor() {
             add_action( 'enqueue_block_editor_assets', function () {
@@ -499,26 +538,35 @@ if ( ! class_exists( 'WPGraphQLGutenberg' ) ) {
 				foreach($this->get_editor_post_types() as $post_type) {
 					if (array_search($post_type, \WPGraphQL::$allowed_post_types, true)) {
 
-
 						register_graphql_field( get_post_type_object($post_type)->graphql_single_name, 'blocks', [
 							'type' => Type::listOf($this->get_graphql_block_interface_type()),
 							'description' => 'Gutenberg blocks',
-							'resolve' => function( $post ) {
-								$blocks = get_post_meta($post->ID, self::$field_name, true);
-								$blocks = is_array($blocks) ? $blocks : [];
+							'args' => [
+								'json' => Type::string(),
+							],
+							'resolve' => function( $post, $args) {
+								if (!empty($args['json'])) {
+									$blocks = $this->get_json_data_blocks(json_decode($args['json'], true));
+								} else {
+									$blocks = get_post_meta($post->ID, self::$field_name, true);
+								}
 
-								return array_map(function($block) {
-									if ($block['name'] === 'core/block') {
-										$id = $block['attributes']['ref'];
-										return get_post_meta($id, self::$field_name, true);
-									}
-
-									return $block;
-								}, $blocks);
+								return $this->resolve_blocks($blocks);
 							}
 						]);
 					}
 				}
+				
+				register_graphql_field( 'RootQuery', 'blocksBy', [
+					'type' => Type::listOf($this->get_graphql_block_interface_type()),
+					'args' => [
+						'json' => Type::string(),
+					],
+					'resolve' => function( $root, $args, $context, $info ) {
+						$data = !empty($args['json']) ? json_decode($args['json'], true) : [];
+						return $this->resolve_blocks($this->get_json_data_blocks($data));
+					}
+				]);
 			});
 
 			add_filter('graphql_schema_config', function($config) {
@@ -538,8 +586,6 @@ if ( ! class_exists( 'WPGraphQLGutenberg' ) ) {
 
 				return $config;
 			});
-
-
 		}
 
 		protected function setup_admin() {
