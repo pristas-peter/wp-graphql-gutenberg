@@ -745,7 +745,7 @@ if (!class_exists('WPGraphQLGutenberg')) {
                                                     __(
                                                         'Failed to update reusable block meta field for wp_block %d.'
                                                     ),
-                                                    $post->ID,
+                                                    $post->ID
                                                 ),
                                                 array('status' => 500)
                                             );
