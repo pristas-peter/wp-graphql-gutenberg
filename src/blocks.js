@@ -90,9 +90,8 @@ const visitBlocks = (blocks, visitor) => {
         visitor(block);
 
         if (block.innerBlocks) {
-            visitBlocks(block.innerBlocks); 
+            visitBlocks(block.innerBlocks, visitor); 
         }
-
     });
 
     return blocks;
