@@ -135,7 +135,11 @@ wpGraphqlGutenberg.postContentBlocks
 *
 * @param array    postContentBlocks
 */
-
+wpGraphqlGutenberg.reusableBlock
+/* Filters reusable_block field in PUT request.
+*
+* @param array    reusableBlock
+*/
 wpGraphqlGutenberg.reusableBlocks
 /* Filters reusable_blocks field in PUT request.
 *
