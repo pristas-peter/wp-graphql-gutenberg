@@ -959,6 +959,10 @@ if (!class_exists('WPGraphQLGutenberg')) {
                     )
                 );
             });
+
+            add_action('admin_footer', function() {
+                echo '"<script type="text/javascript">var admin_url = "' . get_admin_url() . '";</script>"';
+            });
         }
 
         public function setup() {
