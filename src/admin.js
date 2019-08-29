@@ -64,7 +64,7 @@ class Admin extends Component {
 							const iframe = document.createElement( 'iframe' );
 							iframe.wpGraphqlGutenbergAdmin = this;
 							iframe.setAttribute( 'style', 'display: none;' );
-							iframe.setAttribute( 'src', `${ window.admin_url }post.php?post=${ id }&action=edit&wpGraphqlGutenbergForceUpdate` );
+							iframe.setAttribute( 'src', `${ window.wpGraphqlGutenberg.adminUrl }post.php?post=${ id }&action=edit&wpGraphqlGutenbergForceUpdate` );
 
 							document.body.appendChild( iframe );
 							this.updatePromises.set( iframe, { resolve, reject } );

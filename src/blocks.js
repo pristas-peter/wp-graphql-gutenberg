@@ -1,197 +1,219 @@
-/* eslint-disable */
-import Admin from './admin';
+import Admin from "./admin";
 
 const { __ } = wp.i18n;
 
 function getBlockTypesForSerialization() {
-    return wp.blocks.getBlockTypes().map(blockType => lodash.omit(blockType, ['transforms', 'icon']));
+	return wp.blocks
+		.getBlockTypes()
+		.map(blockType => lodash.omit(blockType, ["transforms", "icon"]));
 }
 
 function getReusableBlocks(blocks, blocksById = {}) {
-    const promises = [];
+	const promises = [];
 
-    blocks.forEach(block => {
-        if (block.name === 'core/block') {
-            const id = block.attributes.ref;
+	blocks.forEach(block => {
+		if (block.name === "core/block") {
+			const id = block.attributes.ref;
 
-            promises.push(wp.apiFetch({ path: `/wp/v2/blocks/${id}` })
-                .then(wp_block => {
-                    blocksById[id] = wp.blocks.parse(wp_block.content.raw).pop();
-                }));
-        }
+			promises.push(
+				wp.apiFetch({ path: `/wp/v2/blocks/${id}` }).then(wp_block => {
+					blocksById[id] = wp.blocks.parse(wp_block.content.raw).pop();
+				})
+			);
+		}
 
-        promises.push(getReusableBlocks(block.innerBlocks, blocksById));
+		promises.push(getReusableBlocks(block.innerBlocks, blocksById));
+	});
 
-    });
-
-    return Promise.all(promises)
-        .then(() => blocksById);
+	return Promise.all(promises).then(() => blocksById);
 }
 
-
 function getPostTypeRestBase() {
-    const registry = wp.data && wp.data.select("core/editor");
-    const currentPostType = registry && registry.getCurrentPostType();
+	const registry = wp.data && wp.data.select("core/editor");
+	const currentPostType = registry && registry.getCurrentPostType();
 
-    if (currentPostType) {
-        const postType = wp.data.select("core").getPostType(currentPostType);
+	if (currentPostType) {
+		const postType = wp.data.select("core").getPostType(currentPostType);
 
-        if (postType) {
-            return postType.rest_base;
-        }
-    }
+		if (postType) {
+			return postType.rest_base;
+		}
+	}
 
-    return null;
+	return null;
 }
 
 function isEditorUpdateRequest(options) {
-    const restBase = getPostTypeRestBase();
-    if (restBase) {
-        const regexp = new RegExp(`^\/wp\/v2\/${restBase}\/`);
-        return regexp.test(options.path) && options.method === 'PUT';
-    }
+	const restBase = getPostTypeRestBase();
+	if (restBase) {
+		const regexp = new RegExp(`^\/wp\/v2\/${restBase}\/`);
+		return regexp.test(options.path) && options.method === "PUT";
+	}
 
-    return false;
+	return false;
 }
 
 function isReusableBlockUpdateRequest(options) {
-    return options.method === 'PUT' && /\/wp\/v[0-9]+\/blocks\/[0-9]+(\?.+)*$/.test(options.path);
+	return (
+		options.method === "PUT" &&
+		/\/wp\/v[0-9]+\/blocks\/[0-9]+(\?.+)*$/.test(options.path)
+	);
 }
 
 function shouldForceUpdate() {
-    return window.location.search.substring(1).split('&').indexOf('wpGraphqlGutenbergForceUpdate') > -1;
+	return (
+		window.location.search
+			.substring(1)
+			.split("&")
+			.indexOf("wpGraphqlGutenbergForceUpdate") > -1
+	);
 }
 
 function editorReady(cb) {
-    let interval;
+	let interval;
 
-    const intervalCb = () => {
-        const { id } = wp.data.select("core/editor").getCurrentPost() || {};
+	const intervalCb = () => {
+		const { id } = wp.data.select("core/editor").getCurrentPost() || {};
 
-        if (id) {
-            if (interval) {
-                clearInterval(interval);
-            }
+		if (id) {
+			if (interval) {
+				clearInterval(interval);
+			}
 
-            cb();
-            return true;
-        }
+			cb();
+			return true;
+		}
 
-        return false;
-    }
+		return false;
+	};
 
-    if (!intervalCb()) {
-        interval = setInterval(intervalCb, 250);
-    }
+	if (!intervalCb()) {
+		interval = setInterval(intervalCb, 250);
+	}
 }
 
 const visitBlocks = (blocks, visitor) => {
-    blocks.forEach(block => {
-        visitor(block);
+	blocks.forEach(block => {
+		visitor(block);
 
-        if (block.innerBlocks) {
-            visitBlocks(block.innerBlocks, visitor); 
-        }
-    });
+		if (block.innerBlocks) {
+			visitBlocks(block.innerBlocks, visitor);
+		}
+	});
 
-    return blocks;
-}
+	return blocks;
+};
 
 function preparePostContentBlocks(blocks) {
-    return wp.hooks.applyFilters('wpGraphqlGutenberg.postContentBlocks', visitBlocks(blocks, block => block.parent = wp.data.select("core/editor").getCurrentPost().id));
+	return wp.hooks.applyFilters(
+		"wpGraphqlGutenberg.postContentBlocks",
+		visitBlocks(
+			blocks,
+			block =>
+				(block.parent = wp.data.select("core/editor").getCurrentPost().id)
+		)
+	);
 }
 
 function prepareReusableBlock(block) {
-    return wp.hooks.applyFilters('wpGraphqlGutenberg.reusableBlock', block);
+	return wp.hooks.applyFilters("wpGraphqlGutenberg.reusableBlock", block);
 }
 
 function prepareReusableBlocks(blocksById) {
-    return wp.hooks.applyFilters('wpGraphqlGutenberg.reusableBlocks', blocksById);
-}
-
-wp.wpGraphqlGutenberg = {
-    visitBlocks,
-    preparePostContentBlocks,
-    prepareReusableBlock,
-    prepareReusableBlocks,
-    getBlockTypesForSerialization,
+	return wp.hooks.applyFilters("wpGraphqlGutenberg.reusableBlocks", blocksById);
 }
 
 wp.domReady(() => {
-    const admin = document.getElementById('wp-graphql-gutenberg-admin');
-    
-    if (admin) {
-        wp.element.render(<Admin />, admin);
+	const admin = document.getElementById("wp-graphql-gutenberg-admin");
 
-    } else {
-        const forceUpdate = shouldForceUpdate();
-        
-        wp.apiFetch.use((options, next) => {
-            if (isEditorUpdateRequest(options)) {
-                if (options.data.content) {
-                    const blocks = wp.blocks.parse(options.data.content);
-                    return Promise.all([
-                        preparePostContentBlocks(blocks),
-                        forceUpdate && getReusableBlocks(blocks).then(prepareReusableBlocks)
-                    ]).then(([postContentBlocks, reusableBlocks]) => {
-                        const data = {
-                            block_types: getBlockTypesForSerialization(),
-                            post_content_blocks: postContentBlocks,
-                        };
+	if (admin) {
+		wp.element.render(<Admin />, admin);
+	} else {
+		const forceUpdate = shouldForceUpdate();
 
-                        if (reusableBlocks) {
-                            Object.assign(data, {
-                                reusable_blocks: reusableBlocks,
-                            });
-                        }
+		wp.apiFetch.use((options, next) => {
+			if (isEditorUpdateRequest(options)) {
+				if (options.data.content) {
+					const blocks = wp.blocks.parse(options.data.content);
+					return Promise.all([
+						preparePostContentBlocks(blocks),
+						forceUpdate && getReusableBlocks(blocks).then(prepareReusableBlocks)
+					]).then(([postContentBlocks, reusableBlocks]) => {
+						const data = {
+							block_types: getBlockTypesForSerialization(),
+							post_content_blocks: postContentBlocks
+						};
 
-                        Object.assign(options.data, {
-                            wp_graphql_gutenberg: data,
-                        });
+						if (reusableBlocks) {
+							Object.assign(data, {
+								reusable_blocks: reusableBlocks
+							});
+						}
 
-                        return next(options);
-                    });
-                }
-            }
+						Object.assign(options.data, {
+							wp_graphql_gutenberg: data
+						});
 
-            if (isReusableBlockUpdateRequest(options)) {
-                if (options.data.content) {
-                    const [block] = wp.blocks.parse(options.data.content);
+						return next(options);
+					});
+				}
+			}
 
-                    Object.assign(options.data, {
-                        wp_graphql_gutenberg: {
-                            reusable_block: prepareReusableBlock(block),
-                            block_types: getBlockTypesForSerialization(),
-                        },
-                    });
+			if (isReusableBlockUpdateRequest(options)) {
+				if (options.data.content) {
+					const [block] = wp.blocks.parse(options.data.content);
 
-                    return next(options);
-                }
-            }
+					Object.assign(options.data, {
+						wp_graphql_gutenberg: {
+							reusable_block: prepareReusableBlock(block),
+							block_types: getBlockTypesForSerialization()
+						}
+					});
 
-            return next(options);
-        });
+					return next(options);
+				}
+			}
 
-        if (forceUpdate) {
-            editorReady(() => {
-                const iframe = window.frameElement;
-                const admin = iframe && window.frameElement.wpGraphqlGutenbergAdmin;
+			return next(options);
+		});
 
-                const { id, content } = wp.data.select("core/editor").getCurrentPost();
-                const restBase = getPostTypeRestBase();
+		if (forceUpdate) {
+			editorReady(() => {
+				const iframe = window.frameElement;
+				const admin = iframe && window.frameElement.wpGraphqlGutenbergAdmin;
 
-                const promise = restBase ? wp.apiFetch({
-                    path: `/wp/v2/${restBase}/${id}`,
-                    method: 'PUT',
-                    data: {
-                        content,
-                    }
-                }) : Promise.reject(new Error(__('Could not detect post type\' rest base.', 'wp-graphql-gutenberg')));
+				const { id, content } = wp.data.select("core/editor").getCurrentPost();
+				const restBase = getPostTypeRestBase();
 
-                if (admin) {
-                    admin.handleUpdatePromise(iframe, promise);
-                }
-            });
-        }
-    }
+				const promise = restBase
+					? wp.apiFetch({
+							path: `/wp/v2/${restBase}/${id}`,
+							method: "PUT",
+							data: {
+								content
+							}
+					  })
+					: Promise.reject(
+							new Error(
+								__(
+									"Could not detect post type' rest base.",
+									"wp-graphql-gutenberg"
+								)
+							)
+					  );
+
+				if (admin) {
+					admin.handleUpdatePromise(iframe, promise);
+				}
+			});
+		}
+	}
 });
+
+wp.wpGraphqlGutenberg = {
+	visitBlocks,
+	preparePostContentBlocks,
+	prepareReusableBlock,
+	prepareReusableBlocks,
+	getBlockTypesForSerialization
+};

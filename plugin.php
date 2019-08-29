@@ -33,7 +33,7 @@ if (!class_exists('WPGraphQLGutenberg')) {
     final class WPGraphQLGutenberg {
         private static $field_name = 'wp_graphql_gutenberg';
         private static $block_types_option_name = 'wp_graphql_gutenberg_block_types';
-        private static $block_editor_script_name = 'wp-graphql-gutenberg-script';
+        private static $block_editor_script_name = 'wp-graphql-gutenberg';
         private static $block_editor_script_file = 'dist/blocks.build.js';
 
         private static $attributes_object_type;
@@ -958,10 +958,9 @@ if (!class_exists('WPGraphQLGutenberg')) {
                         'wp-components'
                     )
                 );
-            });
-
-            add_action('admin_footer', function() {
-                echo '"<script type="text/javascript">var admin_url = "' . get_admin_url() . '";</script>"';
+                wp_localize_script(WPGraphQLGutenberg::$block_editor_script_name, 'wpGraphqlGutenberg', [
+                    'adminUrl' => get_admin_url()
+                ]);
             });
         }
 
