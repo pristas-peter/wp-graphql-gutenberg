@@ -30,7 +30,8 @@ function getReusableBlocks(blocks, blocksById = {}) {
 
 function getPostTypeRestBase() {
 	const registry = wp.data && wp.data.select("core/editor");
-	const currentPostType = registry && registry.getCurrentPostType();
+	const post = registry && registry.getCurrentPost();
+	const currentPostType = post && post.type;
 
 	if (currentPostType) {
 		const postType = wp.data.select("core").getPostType(currentPostType);
@@ -71,17 +72,32 @@ function shouldForceUpdate() {
 
 function editorReady(cb) {
 	let interval;
+	let retryCount = 0;
 
 	const intervalCb = () => {
-		const { id } = wp.data.select("core/editor").getCurrentPost() || {};
+		const data = wp.data;
+		const editor = data && data.select("core/editor");
+		const post = editor && editor.getCurrentPost();
 
-		if (id) {
+		if (post && post.id) {
 			if (interval) {
 				clearInterval(interval);
 			}
 
-			cb();
+			cb(post);
 			return true;
+		} 
+		
+		if (data && !editor) {
+			retryCount += 1;
+		}
+
+		if (retryCount === 3) {
+			if (interval) {
+				clearInterval(interval);
+			}
+
+			cb(null);
 		}
 
 		return false;
@@ -178,29 +194,35 @@ wp.domReady(() => {
 		});
 
 		if (forceUpdate) {
-			editorReady(() => {
+			editorReady((post) => {
 				const iframe = window.frameElement;
 				const admin = iframe && window.frameElement.wpGraphqlGutenbergAdmin;
+				
+				let promise;
 
-				const { id, content } = wp.data.select("core/editor").getCurrentPost();
-				const restBase = getPostTypeRestBase();
-
-				const promise = restBase
-					? wp.apiFetch({
+				if (!post) {
+					promise = Promise.resolve();
+				} else {
+					const { id, content } = post;
+					const restBase = getPostTypeRestBase();
+	
+					promise = restBase
+						? wp.apiFetch({
 							path: `/wp/v2/${restBase}/${id}`,
 							method: "PUT",
 							data: {
 								content
 							}
-					  })
-					: Promise.reject(
-							new Error(
-								__(
-									"Could not detect post type' rest base.",
-									"wp-graphql-gutenberg"
+						  })
+						: Promise.reject(
+								new Error(
+									__(
+										"Could not detect post type's rest base.",
+										"wp-graphql-gutenberg"
+									)
 								)
-							)
-					  );
+						  );
+				}
 
 				if (admin) {
 					admin.handleUpdatePromise(iframe, promise);

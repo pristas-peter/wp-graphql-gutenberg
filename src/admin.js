@@ -1,6 +1,6 @@
 import styled from 'styled-components';
 
-const { __ } = wp.i18n;
+const { __, sprintf } = wp.i18n;
 const { Button, withNotices } = wp.components;
 const { apiFetch } = wp;
 
@@ -59,32 +59,38 @@ class Admin extends Component {
 		}, () => {
 			apiFetch( { path: 'wp-graphql-gutenberg/v1/editor-posts' } )
 				.then( ids => {
-					return Promise.all( ids.map( ( id, i ) => new Promise( ( resolve, reject ) => {
-						const next = () => {
-							const iframe = document.createElement( 'iframe' );
-							iframe.wpGraphqlGutenbergAdmin = this;
-							iframe.setAttribute( 'style', 'display: none;' );
-							iframe.setAttribute( 'src', `${ window.wpGraphqlGutenberg.adminUrl }post.php?post=${ id }&action=edit&wpGraphqlGutenbergForceUpdate` );
-
-							document.body.appendChild( iframe );
-							this.updatePromises.set( iframe, { resolve, reject } );
-						};
-
-						if ( i === 0 ) {
-							this.setState( {
-								total: ids.length,
-								progress: 0,
-							}, next );
-						} else {
-							next();
+					return ids.reduce((acc, id, i) => acc.then(() =>
+						new Promise( ( resolve, reject ) => {
+							const next = () => {
+								const iframe = document.createElement( 'iframe' );
+								iframe.wpGraphqlGutenbergAdmin = this;
+								iframe.setAttribute( 'style', 'display: none;' );
+								iframe.setAttribute( 'src', `${ window.wpGraphqlGutenberg.adminUrl }post.php?post=${ id }&action=edit&wpGraphqlGutenbergForceUpdate` );
+	
+								document.body.appendChild( iframe );
+								this.updatePromises.set( iframe, { resolve, reject } );
+							};
+	
+							if ( i === 0 ) {
+								this.setState( {
+									total: ids.length,
+									progress: 0,
+								}, next );
+							} else {
+								next();
+							}
 						}
-					} ) ) );
-				} )
+						).catch(err => {
+							err.message = `${sprintf(__('Failed to update post with id %d.', "wp-graphql-gutenberg"), id)} ${err.message}`;
+							return Promise.reject(err);
+						})), 
+					Promise.resolve());
+				})
 				.then( () => {
 					createNotice( { status: 'success', content: __( 'All posts have been updated.' ) } );
 				} )
 				.catch( err => {
-					createErrorNotice( err );
+					createErrorNotice( (err && err.message) ||  __( 'Update failded.' ) );
 				} )
 				.finally( () => {
 					this.setState( {
