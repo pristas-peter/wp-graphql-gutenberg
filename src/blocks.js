@@ -2,6 +2,15 @@ import Admin from "./admin";
 
 const { __ } = wp.i18n;
 
+function defaultVisitor(block) {
+	block.saveContent = wp.blocks.getSaveContent(
+		block.name,
+		block.attributes,
+		block.innerBlocks
+	);
+	return block;
+}
+
 function getBlockTypesForSerialization() {
 	return wp.blocks
 		.getBlockTypes()
@@ -86,8 +95,8 @@ function editorReady(cb) {
 
 			cb(post);
 			return true;
-		} 
-		
+		}
+
 		if (data && !editor) {
 			retryCount += 1;
 		}
@@ -123,19 +132,25 @@ const visitBlocks = (blocks, visitor) => {
 function preparePostContentBlocks(blocks) {
 	return wp.hooks.applyFilters(
 		"wpGraphqlGutenberg.postContentBlocks",
-		visitBlocks(
-			blocks,
-			block =>
-				(block.parent = wp.data.select("core/editor").getCurrentPost().id)
-		)
+		visitBlocks(blocks, block => {
+			defaultVisitor(block);
+			block.parent = wp.data.select("core/editor").getCurrentPost().id;
+		})
 	);
 }
 
 function prepareReusableBlock(block) {
-	return wp.hooks.applyFilters("wpGraphqlGutenberg.reusableBlock", block);
+	return wp.hooks.applyFilters(
+		"wpGraphqlGutenberg.reusableBlock",
+		visitBlocks([block], defaultVisitor)[0]
+	);
 }
 
 function prepareReusableBlocks(blocksById) {
+	Object.keys(blocksById).forEach(id => {
+		visitBlocks([blocksById[id]], defaultVisitor);
+	});
+
 	return wp.hooks.applyFilters("wpGraphqlGutenberg.reusableBlocks", blocksById);
 }
 
@@ -194,10 +209,10 @@ wp.domReady(() => {
 		});
 
 		if (forceUpdate) {
-			editorReady((post) => {
+			editorReady(post => {
 				const iframe = window.frameElement;
 				const admin = iframe && window.frameElement.wpGraphqlGutenbergAdmin;
-				
+
 				let promise;
 
 				if (!post) {
@@ -205,14 +220,14 @@ wp.domReady(() => {
 				} else {
 					const { id, content } = post;
 					const restBase = getPostTypeRestBase();
-	
+
 					promise = restBase
 						? wp.apiFetch({
-							path: `/wp/v2/${restBase}/${id}`,
-							method: "PUT",
-							data: {
-								content
-							}
+								path: `/wp/v2/${restBase}/${id}`,
+								method: "PUT",
+								data: {
+									content
+								}
 						  })
 						: Promise.reject(
 								new Error(
