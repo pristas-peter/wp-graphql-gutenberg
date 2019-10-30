@@ -6,7 +6,7 @@
  * Description: Enable blocks in WP GraphQL.
  * Author: pristas-peter
  * Author URI:
- * Version: 0.0.6
+ * Version: 0.0.7
  * License: MIT
  * License URI: https://opensource.org/licenses/MIT
  *
@@ -38,6 +38,7 @@ if (!class_exists('WPGraphQLGutenberg')) {
 
         private static $attributes_object_type;
         private static $attributes_array_type;
+        private static $json_array_type;
 
         private static $instance;
         public static function instance() {
@@ -73,6 +74,20 @@ if (!class_exists('WPGraphQLGutenberg')) {
 
             return self::$attributes_array_type;
         }
+
+        public static function get_block_json_array_type() {
+            if (!isset(self::$json_array_type)) {
+                self::$json_array_type = new CustomScalarType([
+                    'name' => 'BlockJsonArray',
+                    'serialize' => function ($value) {
+                        return json_encode($value);
+                    }
+                ]);
+            }
+
+            return self::$json_array_type;
+        }
+
 
         public static function format_graphql_block_type_name($block_name) {
             return implode(
@@ -132,6 +147,13 @@ if (!class_exists('WPGraphQLGutenberg')) {
                                 'type' => Type::nonNull(Type::string()),
                                 'description' => __(
                                     'Original HTML content.',
+                                    'wp-graphql-gutenberg'
+                                )
+                            ],
+                            'saveContent' => [
+                                'type' => Type::nonNull(Type::string()),
+                                'description' => __(
+                                    'Original HTML content with inner blocks.',
                                     'wp-graphql-gutenberg'
                                 )
                             ],
@@ -494,7 +516,8 @@ if (!class_exists('WPGraphQLGutenberg')) {
                         $block_interface->getField('isValid'),
                         $block_interface->getField('originalContent'),
                         $block_interface->getField('parentId'),
-                        $block_interface->getField('parent')
+                        $block_interface->getField('parent'),
+                        $block_interface->getField('saveContent'),
                     ]);
 
                     $registry = WP_Block_Type_Registry::get_instance();
@@ -868,6 +891,18 @@ if (!class_exists('WPGraphQLGutenberg')) {
                                 }
 
                                 return $this->resolve_blocks($blocks);
+                            }
+                        ]);
+
+                        register_graphql_field($type, 'blocksRaw', [
+                            'type' => self::get_block_json_array_type(),
+                            'description' => 'Gutenberg blocks as json string',
+                            'resolve' => function ($post, $args) {
+                                return get_post_meta(
+                                    $post->ID,
+                                    self::$field_name,
+                                    true
+                                );
                             }
                         ]);
                     }
