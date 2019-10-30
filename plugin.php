@@ -491,7 +491,7 @@ if (!class_exists('WPGraphQLGutenberg')) {
                 $union_type_name =
                     self::format_graphql_attributes_type_name($name) . 'Union';
                 register_graphql_union_type($union_type_name, [
-                    'types' => $attributes_types,
+                    'typeNames' => $attributes_types,
                     'resolveType' => function ($value) {
                         return $this->type_registry->get_type($value['__typename']);
                     }
