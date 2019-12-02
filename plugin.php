@@ -274,26 +274,28 @@ if (!class_exists('WPGraphQLGutenberg')) {
             foreach ($attributes as $attribute_name => $attribute) {
                 $type = null;
 
-                switch ($attribute['type']) {
-                    case 'string':
-                        $type = Type::string();
-                        break;
-                    case 'boolean':
-                        $type = Type::boolean();
-                        break;
-                    case 'number':
-                        $type = Type::float();
-                        break;
-                    case 'integer':
-                        $type = Type::int();
-                        break;
-                    case 'array':
-                        $type = self::get_attributes_array_type();
-                        break;
-                    case 'object':
-                        $type = self::get_attributes_object_type();
-                        break;
-                }
+				if (isset($attribute['type'])) {
+					switch ($attribute['type']) {
+						case 'string':
+							$type = Type::string();
+							break;
+						case 'boolean':
+							$type = Type::boolean();
+							break;
+						case 'number':
+							$type = Type::float();
+							break;
+						case 'integer':
+							$type = Type::int();
+							break;
+						case 'array':
+							$type = self::get_attributes_array_type();
+							break;
+						case 'object':
+							$type = self::get_attributes_object_type();
+							break;
+					}
+				}
 
                 if (isset($type)) {
                     if (isset($attribute['default'])) {
