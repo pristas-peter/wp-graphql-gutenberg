@@ -274,25 +274,27 @@ if (!class_exists('WPGraphQLGutenberg')) {
             foreach ($attributes as $attribute_name => $attribute) {
                 $type = null;
 
-                switch ($attribute['type']) {
-                    case 'string':
-                        $type = Type::string();
-                        break;
-                    case 'boolean':
-                        $type = Type::boolean();
-                        break;
-                    case 'number':
-                        $type = Type::float();
-                        break;
-                    case 'integer':
-                        $type = Type::int();
-                        break;
-                    case 'array':
-                        $type = self::get_attributes_array_type();
-                        break;
-                    case 'object':
-                        $type = self::get_attributes_object_type();
-                        break;
+                if (isset($attribute['type'])) {
+                    switch ($attribute['type']) {
+                        case 'string':
+                            $type = Type::string();
+                            break;
+                        case 'boolean':
+                            $type = Type::boolean();
+                            break;
+                        case 'number':
+                            $type = Type::float();
+                            break;
+                        case 'integer':
+                            $type = Type::int();
+                            break;
+                        case 'array':
+                            $type = self::get_attributes_array_type();
+                            break;
+                        case 'object':
+                            $type = self::get_attributes_object_type();
+                            break;
+                    }
                 }
 
                 if (isset($type)) {
@@ -421,9 +423,9 @@ if (!class_exists('WPGraphQLGutenberg')) {
                          *
                          * @param array     $fields           Fields config.
                          * @param string    $type_name        GraphQL type name.
-                         * @param array     $attributes 	  Block type attributes definition.
-                         * @param array     $block_type 	  Block type definition.
-                         * @param object    $type_registry 	  Type registry.
+                         * @param array     $attributes       Block type attributes definition.
+                         * @param array     $block_type       Block type definition.
+                         * @param object    $type_registry       Type registry.
                          */
                         'fields' => apply_filters(
                             'graphql_gutenberg_block_attributes_fields',
@@ -532,7 +534,7 @@ if (!class_exists('WPGraphQLGutenberg')) {
              * Filters the fields for block type.
              *
              * @param array    $fields           Fields config.
-             * @param array     $block_type 	  Block type definition.
+             * @param array     $block_type       Block type definition.
              */
             $fields = apply_filters(
                 'graphql_gutenberg_block_type_fields',
@@ -610,8 +612,8 @@ if (!class_exists('WPGraphQLGutenberg')) {
              * graphql_gutenberg_prepare_block
              * Filters block data before saving to post meta.
              *
-             * @param array    $data             		Data.
-             * @param array     $block_types_per_name 	GraphQL types named array for blocks.
+             * @param array    $data                     Data.
+             * @param array     $block_types_per_name     GraphQL types named array for blocks.
              */
             return apply_filters(
                 'graphql_gutenberg_prepare_block',
