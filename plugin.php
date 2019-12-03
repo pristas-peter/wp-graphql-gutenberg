@@ -9,7 +9,6 @@
  * Version: 0.1.2
  * License: MIT
  * License URI: https://opensource.org/licenses/MIT
- *
  */
 
 namespace WPGraphQLGutenberg;
@@ -643,7 +642,7 @@ if (!class_exists('WPGraphQLGutenberg')) {
                                     false
                                 );
 
-                                if (is_wp_error($ret)) {
+                                if ($ret === false) {
                                     return new WP_Error(
                                         'wp_graphql_gutenberg_block_types_update_failed',
                                         __(
