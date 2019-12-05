@@ -129,14 +129,25 @@ if (!class_exists('WPGraphQLGutenberg')) {
             );
         }
 
+
+        public function resolve_post_type_graphql_type($post_type)
+        {
+            return apply_filters(
+                'graphql_gutenberg_editor_post_type_graphql_type',
+                get_post_type_object($post_type)->graphql_single_name,
+                $post_type
+            );
+        }
+
         public function resolve_post_graphql_type($value)
         {
             $type_name = apply_filters(
-                'graphql_gutenberg_editor_post_type_graphql_type',
+                'graphql_gutenberg_editor_post_graphql_type',
                 get_post_type_object($value->post_type)->graphql_single_name,
                 $value->post_type,
                 $value
             );
+
             return $this->type_registry->get_type($type_name);
         }
 
