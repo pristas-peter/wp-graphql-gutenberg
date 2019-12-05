@@ -1,6 +1,6 @@
 {
-  "name": "wp-graphql-gutenberg-cgb-guten-block",
-  "version": "1.0.0",
+  "name": "wp-graphql-gutenberg",
+  "version": "0.0.4",
   "private": true,
   "scripts": {
     "start": "cgb-scripts start",
@@ -8,8 +8,8 @@
     "eject": "cgb-scripts eject"
   },
   "dependencies": {
-    "cgb-scripts": "^1.18.1",
-    "eslint-plugin-prettier": "^3.1.0",
-    "styled-components": "^4.3.1"
+    "cgb-scripts": "^1.21.0",
+    "eslint-plugin-prettier": "^3.1.1",
+    "styled-components": "^4.4.1"
   }
 }
