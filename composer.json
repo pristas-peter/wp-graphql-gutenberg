@@ -1,8 +1,5 @@
 {
     "name": "pristas-peter/wp-graphql-gutenberg",
     "description": "Query gutenberg blocks with wp-graphql",
-    "type": "wordpress-plugin",
-    "require": {
-		"wp-graphql/wp-graphql": "^0.4.3"
-	}
+    "type": "wordpress-plugin"
 }
