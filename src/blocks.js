@@ -53,6 +53,16 @@ function getPostTypeRestBase() {
 	return null;
 }
 
+function isAutosaveRequest(options) {
+	const restBase = getPostTypeRestBase();
+	if (restBase) {
+		const regexp = new RegExp(`^\/wp\/v2\/${restBase}\/\\d+\/autosaves`);
+		return regexp.test(options.path) && options.method === "POST";
+	}
+
+	return false;
+}
+
 function isEditorUpdateRequest(options) {
 	const restBase = getPostTypeRestBase();
 	if (restBase) {
@@ -163,6 +173,39 @@ wp.domReady(() => {
 		const forceUpdate = shouldForceUpdate();
 
 		wp.apiFetch.use((options, next) => {
+			if (isAutosaveRequest(options)) {
+				if (options.data.content) {
+					const blocks = wp.blocks.parse(options.data.content);
+					return Promise.all([
+						preparePostContentBlocks(blocks),
+						forceUpdate && getReusableBlocks(blocks).then(prepareReusableBlocks)
+					]).then(([postContentBlocks, reusableBlocks]) => {
+						const data = {
+							block_types: getBlockTypesForSerialization(),
+							post_content_blocks: postContentBlocks
+						};
+
+						if (reusableBlocks) {
+							Object.assign(data, {
+								reusable_blocks: reusableBlocks
+							});
+						}
+
+						const restBase = getPostTypeRestBase();
+						const registry = wp.data && wp.data.select("core/editor");
+						const post = registry && registry.getCurrentPost();
+
+						return wp.apiFetch({
+							path: `/wp/v2/${restBase}/${post.id}`,
+							method: "PUT",
+							data: {
+								wp_graphql_gutenberg_preview: data,
+							}
+						});
+					}).then(() => next(options));
+				}
+			}
+
 			if (isEditorUpdateRequest(options)) {
 				if (options.data.content) {
 					const blocks = wp.blocks.parse(options.data.content);

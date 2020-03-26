@@ -31,6 +31,7 @@ if (!class_exists('WPGraphQLGutenberg')) {
     final class WPGraphQLGutenberg
     {
         private static $field_name = 'wp_graphql_gutenberg';
+        private static $field_name_preview = 'wp_graphql_gutenberg_preview';
         private static $block_types_option_name = 'wp_graphql_gutenberg_block_types';
         private static $block_editor_script_name = 'wp-graphql-gutenberg';
         private static $block_editor_script_file = 'dist/blocks.build.js';
@@ -805,6 +806,90 @@ if (!class_exists('WPGraphQLGutenberg')) {
                             )
                         )
                     );
+
+                    register_rest_field(
+                        $post_type,
+                        WPGraphQLGutenberg::$field_name_preview,
+                        array(
+                            'update_callback' => function ($value, $post) {
+                                $block_types = $value['block_types'];
+
+                                update_option(
+                                    WPGraphQLGutenberg::$block_types_option_name,
+                                    $block_types,
+                                    false
+                                );
+
+                                if (
+                                    isset($value['post_content_blocks']) ||
+                                    isset($value['reusable_blocks']) ||
+                                    isset($value['reusable_block'])
+                                ) {
+                                    $block_types_per_name = array_reduce(
+                                        $block_types,
+                                        function (&$arr, $block_type) {
+                                            $arr[$block_type['name']] = $block_type;
+                                            return $arr;
+                                        },
+                                        []
+                                    );
+
+                                    if (isset($value['post_content_blocks'])) {
+                                        $post_content_blocks = array_map(
+                                            function (&$block) use (
+                                                &$block_types_per_name
+                                            ) {
+                                                return $this->prepare_block(
+                                                    $block,
+                                                    $block_types_per_name
+                                                );
+                                            },
+                                            $value['post_content_blocks']
+                                        );
+
+                                        update_post_meta(
+                                            $post->ID,
+                                            WPGraphQLGutenberg::$field_name_preview,
+                                            $post_content_blocks
+                                        );
+                                    }
+
+                                    if (isset($value['reusable_blocks'])) {
+                                        foreach ($value['reusable_blocks']
+                                            as $id => $block) {
+                                            update_post_meta(
+                                                $id,
+                                                WPGraphQLGutenberg::$field_name_preview,
+                                                $this->prepare_block(
+                                                    $block,
+                                                    $block_types_per_name
+                                                )
+                                            );
+                                        }
+                                    }
+
+                                    if (isset($value['reusable_block'])) {
+                                        update_post_meta(
+                                            $post->ID,
+                                            WPGraphQLGutenberg::$field_name_preview,
+                                            $this->prepare_block(
+                                                $value['reusable_block'],
+                                                $block_types_per_name
+                                            )
+                                        );
+                                    }
+                                }
+                                return true;
+                            },
+                            'permission_callback' => function () {
+                                return current_user_can('edit_others_posts');
+                            },
+                            'schema' => array(
+                                'description' => __('Parsed blocks.'),
+                                'type' => 'object'
+                            )
+                        )
+                    );
                 }
 
                 register_rest_route(
@@ -992,6 +1077,31 @@ if (!class_exists('WPGraphQLGutenberg')) {
                                     $blocks = get_post_meta(
                                         $post->ID,
                                         self::$field_name,
+                                        true
+                                    );
+                                }
+
+                                return $this->resolve_blocks($blocks);
+                            }
+                        ]);
+
+                        register_graphql_field($type, 'blocksPreview', [
+                            'type' => [
+                                'list_of' => $this->get_graphql_block_interface_type()
+                            ],
+                            'description' => 'Gutenberg blocks (preview)',
+                            'args' => [
+                                'json' => Type::string()
+                            ],
+                            'resolve' => function ($post, $args) {
+                                if (!empty($args['json'])) {
+                                    $blocks = $this->get_json_data_blocks(
+                                        json_decode($args['json'], true)
+                                    );
+                                } else {
+                                    $blocks = get_post_meta(
+                                        $post->ID,
+                                        self::$field_name_preview,
                                         true
                                     );
                                 }
