@@ -1,15 +1,26 @@
 {
-  "name": "wp-graphql-gutenberg",
-  "version": "0.0.4",
-  "private": true,
-  "scripts": {
-    "start": "cgb-scripts start",
-    "build": "cgb-scripts build",
-    "eject": "cgb-scripts eject"
-  },
-  "dependencies": {
-    "cgb-scripts": "^1.21.0",
-    "eslint-plugin-prettier": "^3.1.1",
-    "styled-components": "^4.4.1"
-  }
+	"name": "wp-graphql-gutenberg",
+	"version": "0.0.4",
+	"private": true,
+	"scripts": {
+		"build": "wp-scripts build",
+		"check-engines": "wp-scripts check-engines",
+		"check-licenses": "wp-scripts check-licenses",
+		"format:js": "wp-scripts format-js",
+		"lint:css": "wp-scripts lint-style",
+		"lint:js": "wp-scripts lint-js",
+		"lint:md:docs": "wp-scripts lint-md-docs",
+		"lint:md:js": "wp-scripts lint-md-js",
+		"lint:pkg-json": "wp-scripts lint-pkg-json",
+		"packages-update": "wp-scripts packages-update",
+		"start": "wp-scripts start"
+	},
+	"dependencies": {
+		"styled-components": "^4.4.1"
+	},
+	"devDependencies": {
+		"@wordpress/scripts": "^7.2.0",
+		"eslint-plugin-eslint-comments": "^3.1.2",
+		"eslint-plugin-import": "^2.20.2"
+	}
 }

@@ -1,5 +1,16 @@
 {
-    "name": "pristas-peter/wp-graphql-gutenberg",
-    "description": "Query gutenberg blocks with wp-graphql",
-    "type": "wordpress-plugin"
+	"name": "pristas-peter/wp-graphql-gutenberg",
+	"description": "Query gutenberg blocks with wp-graphql",
+	"type": "wordpress-plugin",
+	"autoload": {
+		"psr-4": {
+			"WPGraphqlGutenberg\\": "src/"
+		},
+		"classmap": [
+			"src/"
+		]
+	},
+	"config": {
+		"optimize-autoloader": true
+	}
 }
