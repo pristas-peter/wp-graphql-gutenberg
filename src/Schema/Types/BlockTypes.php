@@ -2,6 +2,7 @@
 
 namespace WPGraphQLGutenberg\Schema\Types;
 
+use WPGraphQLGutenberg\Blocks\Registry;
 use WPGraphQLGutenberg\Schema\Types\Scalar\Scalar;
 use WPGraphQLGutenberg\Schema\Utils;
 
@@ -91,6 +92,8 @@ class BlockTypes
     protected static function register_attributes_types($block_type, $prefix)
     {
 
+
+
         $definitions = [$block_type['attributes']];
 
         if (isset($block_type['deprecated'])) {
@@ -129,13 +132,23 @@ class BlockTypes
             }
         }
 
+        if ($block_type['name'] === 'core/image') {
+            $a = $block_type;
+        }
+
         if (count($types) > 1) {
             $type = self::format_attributes($prefix) . 'Union';
 
             register_graphql_union_type($type, [
                 'typeNames' => $types,
                 'resolveType' => function ($source) use ($types_by_definition) {
-                    return $types_by_definition[json_encode($source['__type']['attributes'])];
+                    $result = $types_by_definition[json_encode($source['__type']['attributes'])];
+
+                    if ($result === null) {
+                        $a = $result;
+                    }
+
+                    return $result;
                 }
             ]);
 
@@ -192,11 +205,11 @@ class BlockTypes
         return $name;
     }
 
-    function __construct($registry)
+    function __construct()
     {
         add_action(
             'graphql_register_types',
-            function ($type_registry) use ($registry) {
+            function ($type_registry) {
                 add_filter('graphql_CoreBlock_fields', function ($fields) {
                     $fields['reusableBlock'] = [
                         'type' => ['non_null' => 'ReusableBlock'],
@@ -212,6 +225,8 @@ class BlockTypes
                 });
 
                 $type_names = [];
+
+                $registry = Registry::get_registry();
 
                 foreach ($registry as $block_name => $block_type) {
                     $type_names[] = self::register_block_type($block_type, $type_registry);

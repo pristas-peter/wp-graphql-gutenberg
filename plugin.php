@@ -13,6 +13,9 @@
 
 namespace WPGraphQLGutenberg;
 
+use WPGraphQLGutenberg\Blocks\Registry;
+use WPGraphQLGutenberg\Data\BlocksLoader;
+
 if (!defined('ABSPATH')) {
     die('Silence is golden.');
 }
@@ -29,6 +32,8 @@ if (!class_exists('WPGraphQLGutenberg')) {
 
             return self::$instance;
         }
+
+        public $server;
 
         private function setup_autoload()
         {
@@ -80,17 +85,34 @@ if (!class_exists('WPGraphQLGutenberg')) {
             }
         }
 
-
         public function init()
         {
             $this->setup_constants();
             $this->setup_autoload();
 
+
             new \WPGraphQLGutenberg\PostTypes\BlockEditorPreview();
             new \WPGraphQLGutenberg\Admin\Editor();
             new \WPGraphQLGutenberg\Admin\Settings();
             new \WPGraphQLGutenberg\Rest\Rest();
-            new \WPGraphQLGutenberg\Schema\Schema();
+
+            add_action('init_graphql_request', function () {
+                new \WPGraphQLGutenberg\Schema\Schema();
+                $this->server = new \WPGraphQLGutenberg\Server\Server();
+            });
+
+            add_filter('graphql_request_data', function ($request_data) {
+                if ($this->server->enabled() && $this->server->gutenberg_fields_in_query($request_data['query'])) {
+                    Registry::update_registry(Registry::normalize($this->server->get_block_types()));
+                }
+
+                return $request_data;
+            });
+
+            add_filter('graphql_data_loaders', function ($loaders) {
+                $loaders['blocks'] = new BlocksLoader($this->server);
+                return $loaders;
+            });
         }
     }
 }

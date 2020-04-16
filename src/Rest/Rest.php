@@ -21,7 +21,8 @@ class Rest
                 array(
                     'methods' => 'POST',
                     'callback' => function ($value) {
-                        PostMeta::update_batch($value['batch'], Registry::update_registry($value['block_types']));
+                        Registry::update_registry(Registry::normalize($value['block_types']));
+                        PostMeta::update_batch($value['batch'], Registry::get_registry());
 
                         return (object) [];
                     },
