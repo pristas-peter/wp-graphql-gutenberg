@@ -23,7 +23,8 @@ class StaleContentException extends \Exception implements ClientAware
 
 class BlockEditorContentNode
 {
-    private static function validate($model, $data)
+
+    private static function ensure_not_stale($model, $data)
     {
         if (empty($data)) {
             throw new StaleContentException(__('Blocks content is not sourced.', 'wp-graphql-gutenberg'));
@@ -32,6 +33,13 @@ class BlockEditorContentNode
         if (PostMeta::is_data_stale($model, $data)) {
             throw new StaleContentException(__('Blocks content is stale.', 'wp-graphql-gutenberg'));
         }
+
+        return $data;
+    }
+
+    private static function current_user_has_caps($model)
+    {
+        return current_user_can(get_post_type_object($model->post_type)->cap->edit_posts);
     }
 
     public static function get_config($type_registry)
@@ -46,20 +54,25 @@ class BlockEditorContentNode
                     'type' => [
                         'list_of' => 'Block'
                     ],
-                    'description' => 'Gutenberg blocks',
+                    'description' => __('Gutenberg blocks', 'wp-graphql-gutenberg'),
                     'resolve' => function ($model) {
-                        $data = \WPGraphQLGutenberg\Blocks\PostMeta::get_post($model->ID);
-                        self::validate($model, $data);
+                        if (!self::current_user_has_caps($model)) {
+                            return null;
+                        }
 
+                        $data = self::ensure_not_stale($model, \WPGraphQLGutenberg\Blocks\PostMeta::get_post($model->ID));
                         return $data['blocks'];
                     }
                 ],
                 'blocksJSON' => [
                     'type' => 'String',
-                    'description' => 'Gutenberg blocks as json string',
+                    'description' => __('Gutenberg blocks as json string', 'wp-graphql-gutenberg'),
                     'resolve' => function ($model) {
-                        $data = \WPGraphQLGutenberg\Blocks\PostMeta::get_post($model->ID);
-                        self::validate($model, $data);
+                        if (!self::current_user_has_caps($model)) {
+                            return null;
+                        }
+
+                        $data = self::ensure_not_stale($model, \WPGraphQLGutenberg\Blocks\PostMeta::get_post($model->ID));;
                         return json_encode($data['blocks']);
                     }
                 ],
@@ -67,8 +80,12 @@ class BlockEditorContentNode
                     'type' => [
                         'list_of' => 'Block'
                     ],
-                    'description' => 'Gutenberg blocks as previewed',
-                    'resolve' => BlockEditorPreview::ensure_current_user_can_read(function ($model) {
+                    'description' => __('Previewed gutenberg blocks', 'wp-graphql-gutenberg'),
+                    'resolve' => function ($model, $args, $context, $info) {
+                        if (!self::current_user_has_caps($model)) {
+                            return null;
+                        }
+
                         $id = BlockEditorPreview::get_preview_id($model->ID, $model->ID);
 
                         if (!empty($id)) {
@@ -80,8 +97,12 @@ class BlockEditorContentNode
                 ],
                 'previewBlocksJSON' => [
                     'type' => 'String',
-                    'description' => 'Gutenberg blocks as previewed as json string',
-                    'resolve' => BlockEditorPreview::ensure_current_user_can_read(function ($model) {
+                    'description' => __('Previewed Gutenberg blocks as json string', 'wp-graphql-gutenberg'),
+                    'resolve' => function ($model) {
+                        if (!self::current_user_has_caps($model)) {
+                            return null;
+                        }
+
                         $id = BlockEditorPreview::get_preview_id($model->ID, $model->ID);
 
                         if (!empty($id)) {

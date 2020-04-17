@@ -38,17 +38,6 @@ class BlockEditorPreview
         return WP_GRAPHQL_GUTENBERG_PREVIEW_POST_TYPE_NAME;
     }
 
-    public static function ensure_current_user_can_read($callback)
-    {
-        return function ($source, $args, $context, $info) use ($callback) {
-            if (!apply_filters('graphql_gutenberg_user_can_read_block_editor_previews', current_user_can('edit_others_posts'))) {
-                return null;
-            }
-
-            return $callback($source, $args, $context, $info);
-        };
-    }
-
     public static function is_block_editor_preview($id)
     {
         return get_post_type($id) === WP_GRAPHQL_GUTENBERG_PREVIEW_POST_TYPE_NAME;
@@ -73,7 +62,7 @@ class BlockEditorPreview
                 ]
             ],
             'post_type' => WP_GRAPHQL_GUTENBERG_PREVIEW_POST_TYPE_NAME,
-            'post_status' => 'publish',
+            'post_status' => 'any',
             'fields' => 'ids'
         ]);
 
@@ -91,7 +80,7 @@ class BlockEditorPreview
         $insert_options = [
             'post_title' => $post_id,
             'post_type' => WP_GRAPHQL_GUTENBERG_PREVIEW_POST_TYPE_NAME,
-            'post_status' => 'publish',
+            'post_status' => 'private',
             'meta_input' => [
                 'post_id' => $post_id,
                 'preview_post_id' => $preview_post_id
@@ -115,6 +104,13 @@ class BlockEditorPreview
 
     public function __construct()
     {
+
+        add_filter('graphql_gutenberg_editor_post_types', function ($post_types) {
+            return array_filter($post_types, function ($post_type) {
+                return $post_type !== WP_GRAPHQL_GUTENBERG_PREVIEW_POST_TYPE_NAME;
+            });
+        });
+
         add_filter('graphql_RootMutation_fields', function ($config) {
             $keys = [];
 
@@ -162,19 +158,18 @@ class BlockEditorPreview
                 }
             }
 
+            $query_args['post_status'] = 'private';
+
             return $query_args;
         }, 10, 5);
 
 
-        add_filter('graphql_gutenberg_editor_post_types', function ($post_types) {
-            return array_filter($post_types, function ($post_type) {
-                return $post_type !== WP_GRAPHQL_GUTENBERG_PREVIEW_POST_TYPE_NAME;
-            });
-        });
-
         add_action('init', function () {
             register_post_type(WP_GRAPHQL_GUTENBERG_PREVIEW_POST_TYPE_NAME, array(
-                'public' => true,
+                'public' => false,
+                'labels' => [
+                    'name' => __('Previews', 'wp-graphql-gutenberg')
+                ],
                 'show_in_rest' => true,
                 'rest_base' => 'wp-graphql-gutenberg-previews',
                 'show_ui' => true,
@@ -189,7 +184,6 @@ class BlockEditorPreview
                 'supports' => ['title', 'custom-fields', 'author', 'editor']
             ));
         });
-
 
         add_action('rest_api_init', function () {
             register_rest_route('wp-graphql-gutenberg/v1', '/block-editor-previews/batch', array(
@@ -229,11 +223,10 @@ class BlockEditorPreview
                     }
                 },
                 'permission_callback' => function () {
-                    return current_user_can('edit_others_posts');
+                    return current_user_can('edit_posts');
                 }
             ));
         });
-
 
         add_action('graphql_register_types', function ($type_registry) {
             register_graphql_field(
@@ -241,11 +234,11 @@ class BlockEditorPreview
                 'previewed',
                 [
                     'type' => 'BlockEditorContentNode',
-                    'resolve' => self::ensure_current_user_can_read(function ($model, $args, $context, $info) {
+                    'resolve' => function ($model, $args, $context, $info) {
                         $id = get_post_meta($model->ID, 'post_id', true);
                         $resolver = SchemaUtils::get_post_resolver($id);
                         return $resolver($id, $context);
-                    })
+                    }
                 ]
             );
 
@@ -254,9 +247,9 @@ class BlockEditorPreview
                 'blocks',
                 [
                     'type' => ['list_of' => ['non_null' => 'Block']],
-                    'resolve' => self::ensure_current_user_can_read(function ($model) {
+                    'resolve' => function ($model) {
                         return PostMeta::get_post($model->ID)['blocks'];
-                    })
+                    }
                 ]
             );
 
@@ -265,9 +258,9 @@ class BlockEditorPreview
                 'previewedDatabaseId',
                 [
                     'type' => 'Int',
-                    'resolve' => self::ensure_current_user_can_read(function ($model) {
+                    'resolve' => function ($model) {
                         return get_post_meta($model->ID, 'post_id', true);
-                    })
+                    }
                 ]
             );
 
@@ -276,9 +269,9 @@ class BlockEditorPreview
                 'previewedParentDatabaseId',
                 [
                     'type' => 'Int',
-                    'resolve' => self::ensure_current_user_can_read(function ($model) {
+                    'resolve' => function ($model) {
                         return get_post_meta($model->ID, 'preview_post_id', true);
-                    })
+                    }
                 ]
             );
 
@@ -287,9 +280,9 @@ class BlockEditorPreview
                 'blocksJSON',
                 [
                     'type' => 'String',
-                    'resolve' => self::ensure_current_user_can_read(function ($model) {
+                    'resolve' => function ($model) {
                         return json_encode(PostMeta::get_post($model->ID)['blocks']);
-                    })
+                    }
                 ]
             );
 
@@ -298,11 +291,11 @@ class BlockEditorPreview
                 'lastUpdateTime',
                 [
                     'type' => 'String',
-                    'resolve' => self::ensure_current_user_can_read(function ($model) {
+                    'resolve' => function ($model) {
                         return Utils::prepare_date_response(
                             get_post($model->ID)->post_modified_gmt
                         ) . 'Z';
-                    })
+                    }
                 ]
             );
         });
