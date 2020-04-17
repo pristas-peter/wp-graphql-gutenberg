@@ -93,7 +93,7 @@ class BlockEditorContentNode
                         }
 
                         return null;
-                    })
+                    }
                 ],
                 'previewBlocksJSON' => [
                     'type' => 'String',
@@ -110,7 +110,7 @@ class BlockEditorContentNode
                         }
 
                         return null;
-                    })
+                    }
                 ]
             ],
             'resolveType' => function ($model) use ($type_registry) {
