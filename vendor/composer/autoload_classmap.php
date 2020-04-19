@@ -19,7 +19,7 @@ return array(
     'WPGraphQLGutenberg\\Schema\\Types\\InterfaceType\\Block' => $baseDir . '/src/Schema/Types/InterfaceType/Block.php',
     'WPGraphQLGutenberg\\Schema\\Types\\InterfaceType\\BlockEditorContentNode' => $baseDir . '/src/Schema/Types/InterfaceType/BlockEditorContentNode.php',
     'WPGraphQLGutenberg\\Schema\\Types\\InterfaceType\\StaleContentException' => $baseDir . '/src/Schema/Types/InterfaceType/BlockEditorContentNode.php',
+    'WPGraphQLGutenberg\\Schema\\Types\\Object\\ReusableBlock' => $baseDir . '/src/Schema/Types/Object/ReusableBlock.php',
     'WPGraphQLGutenberg\\Schema\\Types\\Scalar\\Scalar' => $baseDir . '/src/Schema/Types/Scalar/Scalar.php',
     'WPGraphQLGutenberg\\Schema\\Utils' => $baseDir . '/src/Schema/Utils.php',
-    'WPGraphQLGutenberg\\Server\\Server' => $baseDir . '/src/Server/Server.php',
 );

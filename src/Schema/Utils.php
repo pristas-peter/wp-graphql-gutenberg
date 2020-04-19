@@ -59,4 +59,17 @@ class Utils
             return self::get_post_type_graphql_type($post_type);
         }, self::get_graphql_allowed_editor_post_types());
     }
+
+    public static function ensure_capability($resolver, $callback)
+    {
+        return function ($model, $args, $context, $info) use ($resolver, $callback) {
+            $cap = $callback(get_post_type_object($model->post_type)->cap);
+
+            if (!current_user_can($cap)) {
+                return null;
+            }
+
+            return $resolver($model, $args, $context, $info);
+        };
+    }
 }

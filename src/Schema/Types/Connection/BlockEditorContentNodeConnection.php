@@ -7,41 +7,44 @@ use WPGraphQLGutenberg\Schema\Utils;
 
 class BlockEditorContentNodeConnection
 {
-
-    public static function register_type($type_registry)
+    function __construct()
     {
-        register_graphql_connection([
-            'fromType' => 'RootQuery',
-            'toType' => 'BlockEditorContentNode',
-            'fromFieldName' => 'blockEditorContentNodes',
-            'connectionArgs' => PostObjects::get_connection_args(),
-            'connectionTypeName' => 'BlockEditorContentNodeConnection',
-            'resolve' => function ($id, $args, $context, $info) {
-                $resolver = new \WPGraphQL\Data\Connection\PostObjectConnectionResolver(
-                    $id,
-                    $args,
-                    $context,
-                    $info,
-                    'post'
-                );
-                $resolver->setQueryArg(
-                    'post_type',
-                    Utils::get_graphql_allowed_editor_post_types()
-                );
-                $connection = $resolver->get_connection();
-                return $connection;
-            },
-            'resolveNode' => function (
-                $model,
-                $args,
-                $context,
-                $info
-            ) {
-                $id = $model->ID;
+        add_action(
+            'graphql_register_types',
+            function ($type_registry) {
 
-                $resolver = Utils::get_post_resolver($id);
-                return $resolver($id, $context);
+                register_graphql_connection([
+                    'fromType' => 'RootQuery',
+                    'toType' => 'BlockEditorContentNode',
+                    'fromFieldName' => 'blockEditorContentNodes',
+                    'connectionArgs' => PostObjects::get_connection_args(),
+                    'connectionTypeName' => 'BlockEditorContentNodeConnection',
+                    'resolve' => function ($id, $args, $context, $info) {
+                        $resolver = new \WPGraphQL\Data\Connection\PostObjectConnectionResolver(
+                            $id,
+                            $args,
+                            $context,
+                            $info,
+                            'post'
+                        );
+                        $resolver->setQueryArg(
+                            'post_type',
+                            Utils::get_graphql_allowed_editor_post_types()
+                        );
+                        $connection = $resolver->get_connection();
+                        return $connection;
+                    },
+                    'resolveNode' => function (
+                        $id,
+                        $args,
+                        $context,
+                        $info
+                    ) {
+                        $resolver = Utils::get_post_resolver($id);
+                        return $resolver($id, $context);
+                    }
+                ]);
             }
-        ]);
+        );
     }
 }

@@ -3,7 +3,6 @@
 namespace WPGraphQLGutenberg\Schema\Types\InterfaceType;
 
 use WPGraphQLGutenberg\Schema\Utils;
-
 use GraphQL\Error\ClientAware;
 use WPGraphQLGutenberg\Blocks\PostMeta;
 use WPGraphQLGutenberg\PostTypes\BlockEditorPreview;
@@ -23,6 +22,7 @@ class StaleContentException extends \Exception implements ClientAware
 
 class BlockEditorContentNode
 {
+    private $type_registry;
 
     private static function ensure_not_stale($model, $data)
     {
@@ -37,93 +37,131 @@ class BlockEditorContentNode
         return $data;
     }
 
-    private static function current_user_has_caps($model)
+    function __construct()
     {
-        return current_user_can(get_post_type_object($model->post_type)->cap->edit_posts);
-    }
-
-    public static function get_config($type_registry)
-    {
-        return             [
-            'description' => __(
-                'Gutenberg post interface',
-                'wp-graphql-gutenberg'
-            ),
-            'fields' => [
-                'blocks' => [
-                    'type' => [
-                        'list_of' => 'Block'
-                    ],
-                    'description' => __('Gutenberg blocks', 'wp-graphql-gutenberg'),
-                    'resolve' => function ($model) {
-                        if (!self::current_user_has_caps($model)) {
-                            return null;
-                        }
-
-                        $data = self::ensure_not_stale($model, \WPGraphQLGutenberg\Blocks\PostMeta::get_post($model->ID));
-                        return $data['blocks'];
-                    }
+        $fields = [
+            'blocks' => [
+                'type' => [
+                    'list_of' => ['non_null' => 'Block']
                 ],
-                'blocksJSON' => [
-                    'type' => 'String',
-                    'description' => __('Gutenberg blocks as json string', 'wp-graphql-gutenberg'),
-                    'resolve' => function ($model) {
-                        if (!self::current_user_has_caps($model)) {
-                            return null;
-                        }
-
-                        $data = self::ensure_not_stale($model, \WPGraphQLGutenberg\Blocks\PostMeta::get_post($model->ID));;
-                        return json_encode($data['blocks']);
-                    }
-                ],
-                'previewBlocks' => [
-                    'type' => [
-                        'list_of' => 'Block'
-                    ],
-                    'description' => __('Previewed gutenberg blocks', 'wp-graphql-gutenberg'),
-                    'resolve' => function ($model, $args, $context, $info) {
-                        if (!self::current_user_has_caps($model)) {
-                            return null;
-                        }
-
-                        $id = BlockEditorPreview::get_preview_id($model->ID, $model->ID);
-
-                        if (!empty($id)) {
-                            return PostMeta::get_post($id)['blocks'];
-                        }
-
-                        return null;
-                    })
-                ],
-                'previewBlocksJSON' => [
-                    'type' => 'String',
-                    'description' => __('Previewed Gutenberg blocks as json string', 'wp-graphql-gutenberg'),
-                    'resolve' => function ($model) {
-                        if (!self::current_user_has_caps($model)) {
-                            return null;
-                        }
-
-                        $id = BlockEditorPreview::get_preview_id($model->ID, $model->ID);
-
-                        if (!empty($id)) {
-                            return json_encode(PostMeta::get_post($id)['blocks']);
-                        }
-
-                        return null;
-                    })
-                ]
+                'description' => __('Gutenberg blocks', 'wp-graphql-gutenberg'),
+                'resolve' => Utils::ensure_capability(function ($model) {
+                    $data = self::ensure_not_stale($model, PostMeta::get_post($model->ID));
+                    return $data['blocks'];
+                }, function ($cap) {
+                    return $cap->edit_posts;
+                })
             ],
-            'resolveType' => function ($model) use ($type_registry) {
-                return $type_registry->get_type(Utils::get_post_graphql_type($model, $type_registry));
-            }
-        ];
-    }
+            'blocksJSON' => [
+                'type' => 'String',
+                'description' => __('Gutenberg blocks as json string', 'wp-graphql-gutenberg'),
+                'resolve' => Utils::ensure_capability(function ($model) {
+                    $data = self::ensure_not_stale($model, PostMeta::get_post($model->ID));;
+                    return json_encode($data['blocks']);
+                }, function ($cap) {
+                    return $cap->edit_posts;
+                })
+            ],
+            'previewBlocks' => [
+                'type' => [
+                    'list_of' => ['non_null' => 'Block']
+                ],
+                'description' => __('Previewed gutenberg blocks', 'wp-graphql-gutenberg'),
+                'resolve' => Utils::ensure_capability(function ($model) {
+                    $id = BlockEditorPreview::get_preview_id($model->ID, $model->ID);
 
-    public static function register_type($type_registry)
-    {
-        register_graphql_interface_type(
-            'BlockEditorContentNode',
-            self::get_config($type_registry)
+                    if (!empty($id)) {
+                        return PostMeta::get_post($id)['blocks'];
+                    }
+
+                    return null;
+                }, function ($cap) {
+                    return $cap->edit_posts;
+                })
+            ],
+            'previewBlocksJSON' => [
+                'type' => 'String',
+                'description' => __('Previewed Gutenberg blocks as json string', 'wp-graphql-gutenberg'),
+                'resolve' => Utils::ensure_capability(function ($model) {
+                    $id = BlockEditorPreview::get_preview_id($model->ID, $model->ID);
+
+                    if (!empty($id)) {
+                        return json_encode(PostMeta::get_post($id)['blocks']);
+                    }
+
+                    return null;
+                }, function ($cap) {
+                    return $cap->edit_posts;
+                })
+            ]
+        ];
+
+        add_filter('graphql_wp_object_type_config', function (
+            $config
+        ) use ($fields) {
+            if (
+                in_array(
+                    strtolower($config['name']),
+                    array_map(
+                        'strtolower',
+                        Utils::get_editor_graphql_types()
+                    )
+                )
+            ) {
+                $interfaces = $config['interfaces'];
+
+                $config['interfaces'] = function () use (
+                    $interfaces
+                ) {
+                    return array_merge($interfaces(), [
+                        $this->type_registry->get_type(
+                            'BlockEditorContentNode'
+                        )
+                    ]);
+                };
+
+                $fields_cb = $config['fields'];
+
+                $config['fields'] = function () use (
+                    $fields_cb,
+                    $fields
+                ) {
+                    $result = $fields_cb();
+
+                    foreach ($fields as $key => $value) {
+                        $result[$key] = $this->type_registry
+                            ->get_type(
+                                'BlockEditorContentNode'
+                            )
+                            ->getField($key)->config;
+                    }
+
+                    return $result;
+                };
+            }
+            return $config;
+        });
+
+        add_action(
+            'graphql_register_types',
+            function ($type_registry) use ($fields) {
+
+                $this->type_registry = $type_registry;
+
+                register_graphql_interface_type(
+                    'BlockEditorContentNode',
+                    [
+                        'description' => __(
+                            'Gutenberg post interface',
+                            'wp-graphql-gutenberg'
+                        ),
+                        'fields' => $fields,
+                        'resolveType' => function ($model) use ($type_registry) {
+                            return $type_registry->get_type(Utils::get_post_graphql_type($model, $type_registry));
+                        }
+                    ]
+                );
+            }
         );
     }
 }

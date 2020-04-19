@@ -192,50 +192,54 @@ class BlockTypes
         return $name;
     }
 
-    public static function register_block_types($registry, $type_registry)
+    function __construct($registry)
     {
+        add_action(
+            'graphql_register_types',
+            function ($type_registry) use ($registry) {
+                add_filter('graphql_CoreBlock_fields', function ($fields) {
+                    $fields['reusableBlock'] = [
+                        'type' => ['non_null' => 'ReusableBlock'],
+                        'resolve' => function ($source, $args, $context, $info) {
+                            $id = $source['attributes']['ref'];
+                            $resolve = Utils::get_post_resolver($id);
 
-        add_filter('graphql_CoreBlock_fields', function ($fields) {
-            $fields['reusableBlock'] = [
-                'type' => ['non_null' => 'ReusableBlock'],
-                'resolve' => function ($source, $args, $context, $info) {
-                    $id = $source['attributes']['ref'];
-                    $resolve = Utils::get_post_resolver($id);
+                            return $resolve($id, $context);
+                        }
+                    ];
 
-                    return $resolve($id, $context);
-                }
-            ];
+                    return $fields;
+                });
 
-            return $fields;
-        });
+                $type_names = [];
 
-        $type_names = [];
-
-        foreach ($registry as $block_name => $block_type) {
-            $type_names[] = self::register_block_type($block_type, $type_registry);
-        }
-
-        add_filter(
-            'graphql_schema_config',
-            function ($config) use ($type_names, &$type_registry) {
-                $types = [
-                    $type_registry->get_type(
-                        'Block'
-                    )
-                ];
-
-                foreach ($type_names
-                    as  $type_name) {
-                    $types[] = $config['typeLoader']($type_name);
+                foreach ($registry as $block_name => $block_type) {
+                    $type_names[] = self::register_block_type($block_type, $type_registry);
                 }
 
-                $config['types'] = array_merge(
-                    $config['types'] ?? [],
-                    $types
+                add_filter(
+                    'graphql_schema_config',
+                    function ($config) use ($type_names, &$type_registry) {
+                        $types = [
+                            $type_registry->get_type(
+                                'Block'
+                            )
+                        ];
+
+                        foreach ($type_names
+                            as  $type_name) {
+                            $types[] = $config['typeLoader']($type_name);
+                        }
+
+                        $config['types'] = array_merge(
+                            $config['types'] ?? [],
+                            $types
+                        );
+                        return $config;
+                    },
+                    10
                 );
-                return $config;
-            },
-            10
+            }
         );
     }
 }

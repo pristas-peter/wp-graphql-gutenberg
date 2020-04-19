@@ -34,9 +34,9 @@ class ComposerStaticInit36c08dd63dd0653751884939ecbe95bf
         'WPGraphQLGutenberg\\Schema\\Types\\InterfaceType\\Block' => __DIR__ . '/../..' . '/src/Schema/Types/InterfaceType/Block.php',
         'WPGraphQLGutenberg\\Schema\\Types\\InterfaceType\\BlockEditorContentNode' => __DIR__ . '/../..' . '/src/Schema/Types/InterfaceType/BlockEditorContentNode.php',
         'WPGraphQLGutenberg\\Schema\\Types\\InterfaceType\\StaleContentException' => __DIR__ . '/../..' . '/src/Schema/Types/InterfaceType/BlockEditorContentNode.php',
+        'WPGraphQLGutenberg\\Schema\\Types\\Object\\ReusableBlock' => __DIR__ . '/../..' . '/src/Schema/Types/Object/ReusableBlock.php',
         'WPGraphQLGutenberg\\Schema\\Types\\Scalar\\Scalar' => __DIR__ . '/../..' . '/src/Schema/Types/Scalar/Scalar.php',
         'WPGraphQLGutenberg\\Schema\\Utils' => __DIR__ . '/../..' . '/src/Schema/Utils.php',
-        'WPGraphQLGutenberg\\Server\\Server' => __DIR__ . '/../..' . '/src/Server/Server.php',
     );
 
     public static function getInitializer(ClassLoader $loader)

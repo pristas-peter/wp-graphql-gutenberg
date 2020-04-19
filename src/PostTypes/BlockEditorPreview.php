@@ -156,9 +156,9 @@ class BlockEditorPreview
 
                     $query_args['meta_query'][] = ['key' => 'preview_post_id', 'value' => $args['where']['previewedParentDatabaseId']];
                 }
-            }
 
-            $query_args['post_status'] = 'private';
+                $query_args['post_status'] = 'private';
+            }
 
             return $query_args;
         }, 10, 5);
@@ -223,7 +223,7 @@ class BlockEditorPreview
                     }
                 },
                 'permission_callback' => function () {
-                    return current_user_can('edit_posts');
+                    return current_user_can(get_post_type_object(WP_GRAPHQL_GUTENBERG_PREVIEW_POST_TYPE_NAME)->cap->edit_posts);
                 }
             ));
         });

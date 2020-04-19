@@ -11,9 +11,9 @@ if (!defined('WP_GRAPHQL_GUTENBERG_DATA_META_FIELD_NAME')) {
 
 class PostMeta
 {
-    public static function is_data_stale($model, $data)
+    public static function is_data_stale($post, $data)
     {
-        if ($data['post_content'] !== get_post($model->ID)->post_content) {
+        if ($data['post_content'] !== get_post($post->ID)->post_content) {
             return true;
         }
 
