@@ -2,40 +2,15 @@
 
 namespace WPGraphQLGutenberg\Schema\Types\InterfaceType;
 
+use GraphQL\Deferred;
 use WPGraphQLGutenberg\Schema\Utils;
-use GraphQL\Error\ClientAware;
 use WPGraphQLGutenberg\Blocks\PostMeta;
 use WPGraphQLGutenberg\PostTypes\BlockEditorPreview;
-
-class StaleContentException extends \Exception implements ClientAware
-{
-    public function isClientSafe()
-    {
-        return true;
-    }
-
-    public function getCategory()
-    {
-        return 'gutenberg';
-    }
-}
 
 class BlockEditorContentNode
 {
     private $type_registry;
 
-    private static function ensure_not_stale($model, $data)
-    {
-        if (empty($data)) {
-            throw new StaleContentException(__('Blocks content is not sourced.', 'wp-graphql-gutenberg'));
-        }
-
-        if (PostMeta::is_data_stale($model, $data)) {
-            throw new StaleContentException(__('Blocks content is stale.', 'wp-graphql-gutenberg'));
-        }
-
-        return $data;
-    }
 
     function __construct()
     {
@@ -45,9 +20,15 @@ class BlockEditorContentNode
                     'list_of' => ['non_null' => 'Block']
                 ],
                 'description' => __('Gutenberg blocks', 'wp-graphql-gutenberg'),
-                'resolve' => Utils::ensure_capability(function ($model) {
-                    $data = self::ensure_not_stale($model, PostMeta::get_post($model->ID));
-                    return $data['blocks'];
+                'resolve' => Utils::ensure_capability(function ($model, $args, $context, $info) {
+                    $loader =  $context->loaders['blocks'];
+                    $id = $model->ID;
+                    $loader->add($id);
+
+                    return new Deferred(function () use (&$loader, $id) {
+                        $loader->load();
+                        return $loader->get($id);
+                    });
                 }, function ($cap) {
                     return $cap->edit_posts;
                 })
@@ -55,9 +36,15 @@ class BlockEditorContentNode
             'blocksJSON' => [
                 'type' => 'String',
                 'description' => __('Gutenberg blocks as json string', 'wp-graphql-gutenberg'),
-                'resolve' => Utils::ensure_capability(function ($model) {
-                    $data = self::ensure_not_stale($model, PostMeta::get_post($model->ID));;
-                    return json_encode($data['blocks']);
+                'resolve' => Utils::ensure_capability(function ($model, $args, $context, $info) {
+                    $loader =  $context->loaders['blocks'];
+                    $id = $model->ID;
+                    $loader->add($id);
+
+                    return new Deferred(function () use (&$loader, $id) {
+                        $loader->load();
+                        return json_encode($loader->get($id));
+                    });
                 }, function ($cap) {
                     return $cap->edit_posts;
                 })

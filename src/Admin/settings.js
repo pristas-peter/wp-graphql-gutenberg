@@ -135,7 +135,8 @@ class Settings extends Component {
 					} )
 					.catch( ( err ) => {
 						createErrorNotice(
-							( err && err.message ) || __( 'Update failded.' )
+							( err && err.message ) ||
+								__( 'Update failed.', 'wp-graphql-gutenberg' )
 						);
 					} )
 					.finally( () => {
@@ -155,7 +156,12 @@ class Settings extends Component {
 
 		return (
 			<Container>
-				<Heading>{ __( 'WP GraphQL Gutenberg Admin' ) }</Heading>
+				<Heading>
+					{ __(
+						'WP GraphQL Gutenberg Admin',
+						'wp-graphql-gutenberg'
+					) }
+				</Heading>
 				{ noticeUI }
 				<TableContainer>
 					<Table>
@@ -163,7 +169,8 @@ class Settings extends Component {
 							<TRow>
 								<TData>
 									{ __(
-										'Update all posts which support editor'
+										'Update all posts with stale content',
+										'wp-graphql-gutenberg'
 									) }
 								</TData>
 								<TData>
@@ -174,7 +181,10 @@ class Settings extends Component {
 										onClick={ this.onUpdate }
 										disabled={ isBusy }
 									>
-										{ __( 'Update' ) }
+										{ __(
+											'Update',
+											'wp-graphql-gutenberg'
+										) }
 									</Button>
 								</TData>
 								<TData>

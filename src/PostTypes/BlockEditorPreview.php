@@ -189,8 +189,8 @@ class BlockEditorPreview
             register_rest_route('wp-graphql-gutenberg/v1', '/block-editor-previews/batch', array(
                 'methods' => 'POST',
                 'callback' => function (WP_REST_Request $request) {
-
-                    $registry = Registry::update_registry($request->get_param('block_types'));
+                    Registry::update_registry(Registry::normalize($request->get_param('block_types')));
+                    $registry = Registry::get_registry();
 
                     $batch = $request->get_param('batch');
 

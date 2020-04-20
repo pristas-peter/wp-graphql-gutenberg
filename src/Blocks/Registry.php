@@ -9,10 +9,9 @@ if (!defined('WP_GRAPHQL_GUTENBERG_REGISTRY_OPTION_NAME')) {
 class Registry
 {
 
-    public static function update_registry($block_types)
+    public static function normalize($block_types)
     {
-
-        $registry = array_reduce(
+        return array_reduce(
             $block_types,
             function (&$arr, $block_type) {
                 $arr[$block_type['name']] = $block_type;
@@ -20,14 +19,15 @@ class Registry
             },
             []
         );
+    }
 
-        update_option(
+    public static function update_registry($registry)
+    {
+        return update_option(
             WP_GRAPHQL_GUTENBERG_REGISTRY_OPTION_NAME,
             $registry,
             false
         );
-
-        return $registry;
     }
 
     public static function get_registry()

@@ -9,11 +9,10 @@ use WPGraphQLGutenberg\PostTypes\BlockEditorPreview;
 
 class Settings
 {
-    function is_stale($model)
+    function is_stale($id)
     {
-        $data = PostMeta::get_post($model->ID);
-
-        return empty($data) || PostMeta::is_data_stale($model, $data);
+        $data = PostMeta::get_post($id);
+        return empty($data) || PostMeta::is_data_stale($id, $data);
     }
 
     function __construct()
@@ -68,7 +67,7 @@ class Settings
                         $data = [];
 
                         foreach ($query->get_posts() as $post) {
-                            if ($this->is_stale($post)) {
+                            if ($this->is_stale($post->ID)) {
                                 $data[] = [
                                     'id' => $post->ID,
                                     'post_content' => $post->post_content
@@ -76,7 +75,7 @@ class Settings
                             }
 
                             foreach (wp_get_post_revisions($post) as $revision) {
-                                if ($this->is_stale($revision)) {
+                                if ($this->is_stale($revision->ID)) {
                                     $data[] = [
                                         'id' => $revision->ID,
                                         'post_content' => $revision->post_content
