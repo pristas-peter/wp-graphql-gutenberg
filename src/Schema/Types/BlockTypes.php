@@ -132,10 +132,6 @@ class BlockTypes
             }
         }
 
-        if ($block_type['name'] === 'core/image') {
-            $a = $block_type;
-        }
-
         if (count($types) > 1) {
             $type = self::format_attributes($prefix) . 'Union';
 
@@ -143,18 +139,12 @@ class BlockTypes
                 'typeNames' => $types,
                 'resolveType' => function ($source) use ($types_by_definition) {
                     $result = $types_by_definition[json_encode($source['__type']['attributes'])];
-
-                    if ($result === null) {
-                        $a = $result;
-                    }
-
                     return $result;
                 }
             ]);
 
             return $type;
         }
-
 
         return $types[0];
     }
