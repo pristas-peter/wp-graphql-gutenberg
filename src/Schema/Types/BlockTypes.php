@@ -67,12 +67,17 @@ class BlockTypes
             }
 
             if (isset($type)) {
-                if (isset($attribute['default'])) {
+                $default_value = $attribute['default'];
+
+                if (isset($default_value)) {
                     $type = ['non_null' => $type];
                 }
 
                 $fields[$attribute_name] = [
-                    'type' => $type
+                    'type' => $type,
+                    'resolve' => function ($source) use ($attribute_name, $default_value) {
+                        return $source[$attribute_name] ?? $default_value;
+                    }
                 ];
             } else if (WP_DEBUG) {
                 trigger_error(
@@ -91,9 +96,6 @@ class BlockTypes
 
     protected static function register_attributes_types($block_type, $prefix)
     {
-
-
-
         $definitions = [$block_type['attributes']];
 
         if (isset($block_type['deprecated'])) {
@@ -137,8 +139,13 @@ class BlockTypes
 
             register_graphql_union_type($type, [
                 'typeNames' => $types,
-                'resolveType' => function ($source) use ($types_by_definition) {
+                'resolveType' => function ($source) use ($types_by_definition, $non_deprecated_definition_key) {
                     $result = $types_by_definition[json_encode($source['__type']['attributes'])];
+
+                    if ($result === null) {
+                        return $types_by_definition[$non_deprecated_definition_key];
+                    }
+
                     return $result;
                 }
             ]);
@@ -160,7 +167,6 @@ class BlockTypes
                 ) {
                     return array_merge($source['attributes'], [
                         '__type' => $source['__type']
-
                     ]);
                 }
             ]
