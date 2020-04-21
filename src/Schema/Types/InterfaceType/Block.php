@@ -45,14 +45,14 @@ class Block
                                 )
                             ],
                             'originalContent' => [
-                                'type' =>  ['non_null' => 'String'],
+                                'type' =>  'String',
                                 'description' => __(
                                     'Original HTML content.',
                                     'wp-graphql-gutenberg'
                                 )
                             ],
                             'saveContent' => [
-                                'type' =>  ['non_null' => 'String'],
+                                'type' =>  'String',
                                 'description' => __(
                                     'Original HTML content with inner blocks.',
                                     'wp-graphql-gutenberg'
