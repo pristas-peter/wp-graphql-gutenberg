@@ -99,6 +99,7 @@ class BlockEditorPreview
             return $result;
         }
 
+        update_metadata('post', $post_id, 'wp_graphql_gutenberg_preview_update_time', time());
         return PostMeta::update_post($result, null, $blocks, $registry);
     }
 
