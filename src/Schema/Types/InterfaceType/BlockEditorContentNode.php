@@ -20,7 +20,7 @@ class BlockEditorContentNode
                     'list_of' => ['non_null' => 'Block']
                 ],
                 'description' => __('Gutenberg blocks', 'wp-graphql-gutenberg'),
-                'resolve' => Utils::ensure_capability(function ($model, $args, $context, $info) {
+                'resolve' => function ($model, $args, $context, $info) {
                     $loader =  $context->loaders['blocks'];
                     $id = $model->ID;
                     $loader->add($id);
@@ -29,14 +29,12 @@ class BlockEditorContentNode
                         $loader->load();
                         return $loader->get($id);
                     });
-                }, function ($cap) {
-                    return $cap->edit_posts;
-                })
+                }
             ],
             'blocksJSON' => [
                 'type' => 'String',
                 'description' => __('Gutenberg blocks as json string', 'wp-graphql-gutenberg'),
-                'resolve' => Utils::ensure_capability(function ($model, $args, $context, $info) {
+                'resolve' => function ($model, $args, $context, $info) {
                     $loader =  $context->loaders['blocks'];
                     $id = $model->ID;
                     $loader->add($id);
@@ -45,9 +43,7 @@ class BlockEditorContentNode
                         $loader->load();
                         return json_encode($loader->get($id));
                     });
-                }, function ($cap) {
-                    return $cap->edit_posts;
-                })
+                }
             ],
             'previewBlocks' => [
                 'type' => [

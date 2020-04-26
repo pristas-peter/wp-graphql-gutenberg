@@ -87,6 +87,7 @@ if (!class_exists('WPGraphQLGutenberg')) {
 
         public function init()
         {
+
             $this->setup_constants();
             $this->setup_autoload();
 
@@ -112,6 +113,10 @@ if (!class_exists('WPGraphQLGutenberg')) {
             add_filter('graphql_data_loaders', function ($loaders) {
                 $loaders['blocks'] = new BlocksLoader($this->server);
                 return $loaders;
+            });
+
+            register_deactivation_hook(__FILE__, function () {
+                \WPGraphQLGutenberg\Server\Server::cleanup();
             });
         }
     }
