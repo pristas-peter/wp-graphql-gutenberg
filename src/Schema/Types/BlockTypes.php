@@ -67,7 +67,7 @@ class BlockTypes
             }
 
             if (isset($type)) {
-                $default_value = $attribute['default'];
+                $default_value = $attribute['default'] ?? null;
 
                 if (isset($default_value)) {
                     $type = ['non_null' => $type];
@@ -140,7 +140,7 @@ class BlockTypes
             register_graphql_union_type($type, [
                 'typeNames' => $types,
                 'resolveType' => function ($source) use ($types_by_definition, $non_deprecated_definition_key) {
-                    $result = $types_by_definition[json_encode($source['__type']['attributes'])];
+                    $result = $types_by_definition[json_encode($source['__type']['attributes'])] ?? null;
 
                     if ($result === null) {
                         return $types_by_definition[$non_deprecated_definition_key];

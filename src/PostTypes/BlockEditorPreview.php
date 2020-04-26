@@ -99,7 +99,6 @@ class BlockEditorPreview
             return $result;
         }
 
-        update_metadata('post', $post_id, 'wp_graphql_gutenberg_preview_update_time', time());
         return PostMeta::update_post($result, null, $blocks, $registry);
     }
 
@@ -158,7 +157,11 @@ class BlockEditorPreview
                     $query_args['meta_query'][] = ['key' => 'preview_post_id', 'value' => $args['where']['previewedParentDatabaseId']];
                 }
 
-                $query_args['post_status'] = 'private';
+                if (current_user_can(get_post_type_object(WP_GRAPHQL_GUTENBERG_PREVIEW_POST_TYPE_NAME)->cap->edit_posts)) {
+                    $query_args['post_status'] = 'private';
+                } else {
+                    $query_args['post_status'] = 'publish';
+                }
             }
 
             return $query_args;

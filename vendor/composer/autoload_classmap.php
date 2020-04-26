@@ -24,4 +24,5 @@ return array(
     'WPGraphQLGutenberg\\Schema\\Types\\Scalar\\Scalar' => $baseDir . '/src/Schema/Types/Scalar/Scalar.php',
     'WPGraphQLGutenberg\\Schema\\Utils' => $baseDir . '/src/Schema/Utils.php',
     'WPGraphQLGutenberg\\Server\\Server' => $baseDir . '/src/Server/Server.php',
+    'WPGraphQLGutenberg\\Server\\ServerException' => $baseDir . '/src/Server/Server.php',
 );
