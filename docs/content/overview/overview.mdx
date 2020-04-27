@@ -1,0 +1,114 @@
+---
+title: Overview
+description: Brief introduction into plugin's internals
+---
+
+## Gutenberg codebase
+
+Gutenberg is a Javacsript browser app internally based on React framework (wrapped through the `@wordpress/element` package). It also uses its own state management module which is inspired by Redux called `@wordpress/data`. Gutenberg also provides some other generic packages under the `@wordpress` scope, which are handy for writting other Javacsript code for Wordpress, like `@wordpress/api-fetch` for using the WP REST API, or `@wordpress/scripts` tool to easily scafold your app quickly.
+
+> Check out the project's [Github page](https://github.com/WordPress/gutenberg) for more information.
+
+## How does Gutenberg store its content?
+
+> Get familiar with blocks core concepts from the [official handbook](https://developer.wordpress.org/block-editor/principles/key-concepts/).
+
+In a nutshell, `block` is some kind of unit for defining structured content. Every block has unique namespaced name and has to be registered in the `block registry` upon gutenberg bootstrap.
+Each block also contains `attributes` or configuration setting, which acts as a further metadata storage.
+
+The gutenberg editor than uses raw post html content to serialize/parse block information which is stored in html comments.
+
+Here is the example of serialized blocks in raw html post content,
+
+```html
+<!-- wp:columns {"columns":3} -->
+<div class="wp-block-columns has-3-columns">
+	<!-- wp:column -->
+	<div class="wp-block-column">
+		<!-- wp:paragraph -->
+		<p>Left</p>
+		<!-- /wp:paragraph -->
+	</div>
+	<!-- /wp:column -->
+
+	<!-- wp:column -->
+	<div class="wp-block-column">
+		<!-- wp:paragraph -->
+		<p><strong>Middle</strong></p>
+		<!-- /wp:paragraph -->
+	</div>
+	<!-- /wp:column -->
+
+	<!-- wp:column -->
+	<div class="wp-block-column"></div>
+	<!-- /wp:column -->
+</div>
+<!-- /wp:columns -->
+```
+
+and here the parsed counterpart:
+
+```js
+const blocks = [
+	{
+		blockName: "core/columns",
+		attrs: {
+			columns: 3,
+		},
+		innerBlocks: [
+			{
+				blockName: "core/column",
+				attrs: null,
+				innerBlocks: [
+					{
+						blockName: "core/paragraph",
+						attrs: null,
+						innerBlocks: [],
+						innerHTML: "\n<p>Left</p>\n",
+					},
+				],
+				innerHTML: '\n<div class="wp-block-column"></div>\n',
+			},
+			{
+				blockName: "core/column",
+				attrs: null,
+				innerBlocks: [
+					{
+						blockName: "core/paragraph",
+						attrs: null,
+						innerBlocks: [],
+						innerHTML: "\n<p><strong>Middle</strong></p>\n",
+					},
+				],
+				innerHTML: '\n<div class="wp-block-column"></div>\n',
+			},
+			{
+				blockName: "core/column",
+				attrs: null,
+				innerBlocks: [],
+				innerHTML: '\n<div class="wp-block-column"></div>\n',
+			},
+		],
+		innerHTML: '\n<div class="wp-block-columns has-3-columns">\n\n\n\n</div>\n',
+	},
+]
+```
+
+## Issues with Gutenberg
+
+Gutenberg's main issue lies within its client-side only architecture for registering/validating blocks. This way the block registry and block definitions are only available in the editor itself but not available from the PHP side of WordPress. This exposes many challenges on how to actually expose this information outside of WordPress.
+
+> There is also a wordpress's php `parse_blocks()` function. However it does not respect many aspects of block parsing which are evaluated inside gutenberg like attributes parsed from html nodes or block validation. Also there is no `block_type registry` on the server, so you have no way to know how the blocks are defined.
+
+## How are the editor data available through GraphQL then?
+
+Since gutenberg uses WP REST API, this plugin intercepts these requests when needed and adds its own metadata to request's payload. The metadata contains block type definitions from the registry and parsed blocks. These are than processed on the server side and saved to post's meta and options respectively.
+
+## What can I do when I already have some content, but is missing the required metadata, or metadata is out of sync?
+
+The plugin is able to detect these situations an errors out with content is stale exception when resolving. To fix this situation, you have two options:
+
+- use the plugin's admin settings page which has the ability to query the server for stale content, open the gutenberg inside hidden iframe and use it to update the stale metadata
+- use the optional javascript server app, which opens up gutenberg with the help of headless browser and returns the data seamlessly as if they were stored inside database
+
+> Checkout out the [server](/server/overview/) section if you are intersted in how the server app works and how to use it.

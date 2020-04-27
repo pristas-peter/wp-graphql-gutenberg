@@ -1,0 +1,9 @@
+p {
+	word-break: break-word;
+}
+
+html body img[src*="netlify"],
+html body img[src*="vercel"] {
+	display: inline-block;
+	text-align: left;
+}
