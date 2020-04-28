@@ -1,0 +1,198 @@
+---
+title: Overview
+description: How do Previews work?
+---
+
+Previews are stored in the database in their own custom private post type (defaults to `wgg_preview`). They contain a one-to-one relationship with the edited post and hold the same metadata as the ones used in regular posts. The plugin also contains a javascript code, which bootstraps into gutenberg and watches the changes as they happen. These changes are then pushed back to the server through the custom registered REST API endpoint.
+
+This model works since gutenberg enforces only one user to be able to edit content for the same post at the same time. One exception to this are the reusable blocks, which can be edited at the same time from different editor instances. That's why you can find multiple preview records for a reusable block, which also hold the information from which post the edits come from.
+
+You can query previews via the `previewBlocks` field on the `BlockEditorContentNode` interface type:
+
+> Don't forget that you have to be authenticated and the user has to have `edit_posts` primitive capability on the preview custom post type to be able to query previews. You can find guides on [how to authenticate](https://docs.wpgraphql.com/guides/authentication-and-authorization/) in the wp-graphql docs. If you want to read more on WordPress roles and capabilities, you can check out this great [blog post](https://kinsta.com/blog/wordpress-user-roles/).
+
+```graphql
+{
+	posts {
+		edges {
+			node {
+				blocks {
+					__typename
+				}
+				previewBlocks {
+					__typename
+					# returns same Block interface as blocks field
+				}
+			}
+		}
+	}
+}
+```
+
+```json
+{
+	"data": {
+		"posts": {
+			"edges": [
+				{
+					"node": {
+						"blocks": [
+							{
+								"__typename": "CoreParagraphBlock"
+							}
+						],
+						"previewBlocks": [
+							{
+								"__typename": "CoreParagraphBlock"
+							}
+						]
+					}
+				}
+			]
+		}
+	}
+}
+```
+
+or you can query them via the `blockEditorPreviews` field on RootQuery:
+
+```graphql
+{
+	blockEditorPreviews {
+		edges {
+			node {
+				# id of the previewed post (can be a reusable block wp_block post type)
+				previewedDatabaseId
+				# id of the post which is opened in the editor
+				previewedParentDatabaseId
+				# reference to the previewed graphql post type
+				previewed {
+					__typename
+				}
+				blocks {
+					__typename
+				}
+			}
+		}
+	}
+}
+```
+
+```json
+{
+	"data": {
+		"blockEditorPreviews": {
+			"edges": [
+				{
+					"node": {
+						"previewedDatabaseId": 1,
+						"previewedParentDatabaseId": 1,
+						"previewed": {
+							"__typename": "Post"
+						},
+						"blocks": [
+							{
+								"__typename": "CoreParagraphBlock"
+							}
+						]
+					}
+				},
+				{
+					"node": {
+						"previewedDatabaseId": 8,
+						"previewedParentDatabaseId": 2,
+						"previewed": {
+							"__typename": "ReusableBlock"
+						},
+						"blocks": [
+							{
+								"__typename": "CoreQuoteBlock"
+							}
+						]
+					}
+				},
+				{
+					"node": {
+						"previewedDatabaseId": 2,
+						"previewedParentDatabaseId": 2,
+						"previewed": {
+							"__typename": "Page"
+						},
+						"blocks": [
+							{
+								"__typename": "CoreParagraphBlock"
+							},
+							{
+								"__typename": "CoreBlock"
+							},
+							{
+								"__typename": "CoreParagraphBlock"
+							},
+							{
+								"__typename": "CoreQuoteBlock"
+							},
+							{
+								"__typename": "CoreParagraphBlock"
+							}
+						]
+					}
+				}
+			]
+		}
+	}
+}
+```
+
+> Notice the second node in the result data, this is the preview of the reusable block, which is opened inside the post with id 2.
+
+You can also find additional fields on the `ReusableBlock` type, where you can specify, which preview of the reusable block you want to see:
+
+```graphql
+{
+	reusableBlocks(where: { id: 8 }) {
+		edges {
+			node {
+				__typename
+				databaseId
+				# this is the preview when you open the reusable block on its
+				# own editor page (via Manage all reusable blocks button)
+				previewBlocks {
+					__typename
+				}
+				# this is the preview when the reusable block is edited
+				# on the page of the post with id 2
+				previewBlocksFrom(databaseId: 2) {
+					__typename
+				}
+			}
+		}
+	}
+}
+```
+
+```json
+{
+	"data": {
+		"reusableBlocks": {
+			"edges": [
+				{
+					"node": {
+						"__typename": "ReusableBlock",
+						"databaseId": 8,
+						"previewBlocks": [
+							{
+								"__typename": "CoreQuoteBlock"
+							}
+						],
+						"previewBlocksFrom": [
+							{
+								"__typename": "CoreQuoteBlock"
+							}
+						]
+					}
+				}
+			]
+		}
+	}
+}
+```

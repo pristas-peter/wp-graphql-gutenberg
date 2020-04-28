@@ -1,0 +1,31 @@
+---
+title: Overview
+---
+
+## What is WpGraphqlGutenberg Server?
+
+Server is an optional javascript app, which opens up gutenberg with the help of headless browser and returns the data seamlessly as if they were stored inside database. This app was written for advanced users which like to do manual edits in the database, migrate posts from site to site or do things which can get saved metadata out of sync with the actual content.
+
+## How does this work exactly?
+
+The server extension can be enabled through the plugin configuation. As the resolver and code which creates the schema out of block types registry needs to make additional round trips to gutenberg and back, the wp-graphql-gutenberg tries to be smart enough to analyze the query beforhand and do these requests only if the query actually contains the fields which this plugin exposes or the query is the introspection query of the schema.
+
+The field resolvers are also using the dataloader pattern so there are maximum of two round trip requests per query (one for the schema initialization and one for the actual parsed content). Another optimalization lies within the change detection of the raw post content with the saved cached metadata, so if the content has not changed with what is stored in the database, the additonal request is not required.
+
+## How does the server authenticate with Gutenberg which is run in the headless browser?
+
+The plugin uses its own created WordPress role called 'WpGraphqlGutenberg Server User' and own created user with that role only. The role only has the `edit_posts` capability for the custom post type which is used for the Previews feature and which also supports the block editor. Upon each request a short lived cookie is created for this user to access the admin area and the gutenberg is opened with this cookie in the headless browser as if it was opened for new the creation of this post type. This way the blocks api and registry is exposed to the browser and the content can be parsed and sent back to the resolver on the PHP side.
+
+## Installation and configuration
+
+To enable the server extension, you need to define the `WP_GRAPHQL_GUTENBERG_SERVER_URL` constant, preferable in your `wp-config.php` file:
+
+```php
+define('WP_GRAPHQL_GUTENBERG_SERVER_URL', 'http://localhost:5000');
+```
+
+You can optionaly enable/disable the server with `WP_GRAPHQL_GUTENBERG_ENABLE_SERVER` (even if the `WP_GRAPHQL_GUTENBERG_SERVER_URL` is defined):
+
+```php
+define('WP_GRAPHQL_GUTENBERG_ENABLE_SERVER', false);
+```
