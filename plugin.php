@@ -92,6 +92,7 @@ if (!class_exists('WPGraphQLGutenberg')) {
             $this->setup_autoload();
 
 
+            new \WPGraphQLGutenberg\PostTypes\ReusableBlock();
             new \WPGraphQLGutenberg\PostTypes\BlockEditorPreview();
             new \WPGraphQLGutenberg\Admin\Editor();
             new \WPGraphQLGutenberg\Admin\Settings();

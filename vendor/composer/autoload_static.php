@@ -29,6 +29,7 @@ class ComposerStaticInit36c08dd63dd0653751884939ecbe95bf
         'WPGraphQLGutenberg\\Data\\BlocksLoader' => __DIR__ . '/../..' . '/src/Data/BlocksLoader.php',
         'WPGraphQLGutenberg\\Data\\StaleContentException' => __DIR__ . '/../..' . '/src/Data/BlocksLoader.php',
         'WPGraphQLGutenberg\\PostTypes\\BlockEditorPreview' => __DIR__ . '/../..' . '/src/PostTypes/BlockEditorPreview.php',
+        'WPGraphQLGutenberg\\PostTypes\\ReusableBlock' => __DIR__ . '/../..' . '/src/PostTypes/ReusableBlock.php',
         'WPGraphQLGutenberg\\Rest\\Rest' => __DIR__ . '/../..' . '/src/Rest/Rest.php',
         'WPGraphQLGutenberg\\Schema\\Schema' => __DIR__ . '/../..' . '/src/Schema/Schema.php',
         'WPGraphQLGutenberg\\Schema\\Types\\BlockTypes' => __DIR__ . '/../..' . '/src/Schema/Types/BlockTypes.php',

@@ -14,6 +14,7 @@ return array(
     'WPGraphQLGutenberg\\Data\\BlocksLoader' => $baseDir . '/src/Data/BlocksLoader.php',
     'WPGraphQLGutenberg\\Data\\StaleContentException' => $baseDir . '/src/Data/BlocksLoader.php',
     'WPGraphQLGutenberg\\PostTypes\\BlockEditorPreview' => $baseDir . '/src/PostTypes/BlockEditorPreview.php',
+    'WPGraphQLGutenberg\\PostTypes\\ReusableBlock' => $baseDir . '/src/PostTypes/ReusableBlock.php',
     'WPGraphQLGutenberg\\Rest\\Rest' => $baseDir . '/src/Rest/Rest.php',
     'WPGraphQLGutenberg\\Schema\\Schema' => $baseDir . '/src/Schema/Schema.php',
     'WPGraphQLGutenberg\\Schema\\Types\\BlockTypes' => $baseDir . '/src/Schema/Types/BlockTypes.php',
