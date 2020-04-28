@@ -35,13 +35,13 @@ class BlockEditorContentNodeConnection
                         return $connection;
                     },
                     'resolveNode' => function (
-                        $id,
+                        $model,
                         $args,
                         $context,
                         $info
                     ) {
-                        $resolver = Utils::get_post_resolver($id);
-                        return $resolver($id, $context);
+                        $resolver = Utils::get_post_resolver($model->ID);
+                        return $resolver($model->ID, $context);
                     }
                 ]);
             }
