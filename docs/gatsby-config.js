@@ -40,11 +40,11 @@ module.exports = {
 				// },
 				sidebarCategories: {
 					null: [`index`],
-					Installation: [`installation/installation`],
-					Overview: [
-						`overview/overview`,
-						`overview/how-to-query`,
-						`overview/revisions-and-previews`,
+					"Getting Started": [
+						`getting-started/installation`,
+						`getting-started/overview`,
+						`getting-started/how-to-query`,
+						`getting-started/revisions-and-previews`,
 					],
 					Previews: [`previews/overview`],
 					Server: [
