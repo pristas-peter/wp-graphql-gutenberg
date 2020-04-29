@@ -11,6 +11,10 @@ class ComposerStaticInit36c08dd63dd0653751884939ecbe95bf
         array (
             'WPGraphqlGutenberg\\' => 19,
         ),
+        'D' => 
+        array (
+            'Dealerdirect\\Composer\\Plugin\\Installers\\PHPCodeSniffer\\' => 55,
+        ),
     );
 
     public static $prefixDirsPsr4 = array (
@@ -18,9 +22,14 @@ class ComposerStaticInit36c08dd63dd0653751884939ecbe95bf
         array (
             0 => __DIR__ . '/../..' . '/src',
         ),
+        'Dealerdirect\\Composer\\Plugin\\Installers\\PHPCodeSniffer\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/dealerdirect/phpcodesniffer-composer-installer/src',
+        ),
     );
 
     public static $classMap = array (
+        'Dealerdirect\\Composer\\Plugin\\Installers\\PHPCodeSniffer\\Plugin' => __DIR__ . '/..' . '/dealerdirect/phpcodesniffer-composer-installer/src/Plugin.php',
         'WPGraphQLGutenberg\\Admin\\Editor' => __DIR__ . '/../..' . '/src/Admin/Editor.php',
         'WPGraphQLGutenberg\\Admin\\Settings' => __DIR__ . '/../..' . '/src/Admin/Settings.php',
         'WPGraphQLGutenberg\\Blocks\\PostMeta' => __DIR__ . '/../..' . '/src/Blocks/PostMeta.php',
