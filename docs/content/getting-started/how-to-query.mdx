@@ -1,0 +1,262 @@
+---
+title: How to query
+---
+
+The plugin extends schema with new graphql types and fields. Here is a brief overview of how you can use them.
+
+> One of the easiest ways to explore what is available to be queried, is by exploring the Schema using the Documentation explorer in GraphiQL.
+
+## Block
+
+- interface type which represents a single block
+- base for all other object block types
+
+Since `Block` is an interface you have to use spread syntax in your queries if you want to taget specific block type, for example for `core/paragraph` block, the representing graphql object type is called `CoreParagraphBlock` and the syntax for querying is:
+
+```graphql
+# ...
+# blocks field represents array of Block
+blocks {
+    # fields from the interface
+    clientId
+    isDynamic
+    ... on CoreParagraphBlock {
+        attributes {
+            ... on CoreParagraphBlockAttributes {
+                content
+            }
+        }
+    }
+}
+# ...
+```
+
+You can also notice the spread syntax on the `attributes` field. Since block attributes can be deprecated in block type definition, all possible attribute graphql types are created and resolved when running the query.
+
+> If you are not familiar with block deprecations, you can read more about them in the [official handbook](https://developer.wordpress.org/block-editor/developers/block-api/block-deprecation/).
+
+## BlockEditorContentNode
+
+- interface type which represents a post node which supports block editor (gutenberg)
+
+An example query:
+
+```graphql
+fragment SomeBlockFields on Block {
+	__typename
+	parent {
+		__typename
+	}
+	parentDatabaseId
+	name
+}
+
+query GetAllPostsWhichSupportBlockEditor {
+	posts {
+		edges {
+			node {
+				... on ContentNode {
+					id
+					databaseId
+				}
+				... on BlockEditorContentNode {
+					blocks {
+						...SomeBlockFields
+						innerBlocks {
+							...SomeBlockFields
+						}
+					}
+				}
+			}
+		}
+	}
+}
+```
+
+and the result:
+
+```json
+{
+	"data": {
+		"posts": {
+			"edges": [
+				{
+					"node": {
+						"id": "cG9zdDox",
+						"databaseId": 1,
+						"blocks": [
+							{
+								"__typename": "CoreParagraphBlock",
+								"parent": {
+									"__typename": "Post"
+								},
+								"parentDatabaseId": 1,
+								"name": "core/paragraph",
+								"innerBlocks": []
+							}
+						]
+					}
+				}
+			]
+		}
+	}
+}
+```
+
+The plugin also creates a connection on RootQuery named `blockEditorContentNodes` where you can query for all custom post types which support block editor:
+
+```graphql
+{
+	blockEditorContentNodes {
+		edges {
+			node {
+				... on ContentNode {
+					databaseId
+					slug
+				}
+				__typename
+				blocks {
+					__typename
+					... on CoreParagraphBlock {
+						attributes {
+							... on CoreParagraphBlockAttributes {
+								content
+							}
+						}
+						saveContent
+					}
+				}
+			}
+		}
+	}
+}
+```
+
+```json
+{
+	"data": {
+		"blockEditorContentNodes": {
+			"edges": [
+				{
+					"node": {
+						"databaseId": 2,
+						"slug": "sample-page",
+						"__typename": "Page",
+						"blocks": [
+							{
+								"__typename": "CoreParagraphBlock",
+								"attributes": {
+									"content": "This is an example page. It's different from a blog post because it will stay in one place and will show up in your site navigation (in most themes). Most people start with an About page that introduces them to potential site visitors. It might say something like this:"
+								},
+								"saveContent": "<p>This is an example page. It's different from a blog post because it will stay in one place and will show up in your site navigation (in most themes). Most people start with an About page that introduces them to potential site visitors. It might say something like this:</p>"
+							},
+							{
+								"__typename": "CoreQuoteBlock"
+							},
+							{
+								"__typename": "CoreParagraphBlock",
+								"attributes": {
+									"content": "...or something like this:"
+								},
+								"saveContent": "<p>...or something like this:</p>"
+							},
+							{
+								"__typename": "CoreQuoteBlock"
+							},
+							{
+								"__typename": "CoreParagraphBlock",
+								"attributes": {
+									"content": "As a new WordPress user, you should go to <a href=\"http://wgg.local/wp-admin/\">your dashboard</a> to delete this page and create new pages for your content. Have fun!"
+								},
+								"saveContent": "<p>As a new WordPress user, you should go to <a href=\"http://wgg.local/wp-admin/\">your dashboard</a> to delete this page and create new pages for your content. Have fun!</p>"
+							}
+						]
+					}
+				},
+				{
+					"node": {
+						"databaseId": 1,
+						"slug": "hello-world",
+						"__typename": "Post",
+						"blocks": [
+							{
+								"__typename": "CoreParagraphBlock",
+								"attributes": {
+									"content": "Welcome to WordPress. This is your first post. Edit or delete it, then start writing!"
+								},
+								"saveContent": "<p>Welcome to WordPress. This is your first post. Edit or delete it, then start writing!</p>"
+							}
+						]
+					}
+				}
+			]
+		}
+	}
+}
+```
+
+## ReusableBlock
+
+Plugin also registers the core `wp_block` post type as a `ReusableBlock` type. This type represents a block, which can be reused over multiple posts as one shared block and is stored in the database. The block in post content which links with this custom post type in the post content is named `CoreBlock` and has a `reusableBlock` field, which can be used as one to one relation to `ReusableBlock`.
+
+```graphql
+{
+	pages {
+		edges {
+			node {
+				blocks {
+					__typename
+					... on CoreBlock {
+						reusableBlock {
+							title
+							blocks {
+								__typename
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+}
+```
+
+```json
+{
+	"data": {
+		"pages": {
+			"edges": [
+				{
+					"node": {
+						"blocks": [
+							{
+								"__typename": "CoreParagraphBlock"
+							},
+							{
+								"__typename": "CoreBlock",
+								"reusableBlock": {
+									"title": "Shared Block",
+									"blocks": [
+										{
+											"__typename": "CoreQuoteBlock"
+										}
+									]
+								}
+							},
+							{
+								"__typename": "CoreParagraphBlock"
+							},
+							{
+								"__typename": "CoreQuoteBlock"
+							},
+							{
+								"__typename": "CoreParagraphBlock"
+							}
+						]
+					}
+				}
+			]
+		}
+	}
+}
+```

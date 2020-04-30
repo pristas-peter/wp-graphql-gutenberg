@@ -1,0 +1,103 @@
+---
+title: Revisions and previews
+---
+
+## Revisions
+
+Gutenberg creates revisions when:
+
+- you hit the Preview button
+- when there is a periodical autosave
+
+Revisions can be queried on every post type that supports them, so basically you can query gutenberg fields as on the type itself:
+
+```graphql
+{
+	posts {
+		edges {
+			node {
+				revisions(first: 1) {
+					edges {
+						node {
+							blocks {
+								__typename
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+}
+```
+
+```json
+{
+	"data": {
+		"posts": {
+			"edges": [
+				{
+					"node": {
+						"revisions": {
+							"edges": [
+								{
+									"node": {
+										"blocks": [
+											{
+												"__typename": "CoreParagraphBlock"
+											}
+										]
+									}
+								}
+							]
+						}
+					}
+				}
+			]
+		}
+	}
+}
+```
+
+> Don't forget that you have to be authenticated and have requested capabilites to be able to query revisions. You can find guides on [how to authenticate](https://docs.wpgraphql.com/guides/authentication-and-authorization/) in the wp-graphql docs.
+
+## Previews
+
+Previews are this plugin's custom feature, which enables you to query gutenberg fields straight away after you make the edits in the editor (even without the hitting of preview button). If you are interested in about how this feature works, check out the [previews overview](/previews/overview/) section.
+
+```graphql
+{
+	posts {
+		edges {
+			node {
+				previewBlocks {
+					__typename
+					# returns same Block interface as blocks field
+				}
+			}
+		}
+	}
+}
+```
+
+```json
+{
+	"data": {
+		"posts": {
+			"edges": [
+				{
+					"node": {
+						"previewBlocks": [
+							{
+								"__typename": "CoreParagraphBlock"
+							}
+						]
+					}
+				}
+			]
+		}
+	}
+}
+```
+
+> Don't forget that you have to be authenticated and have requested capabilites to be able to query previews. You can find guides on [how to authenticate](https://docs.wpgraphql.com/guides/authentication-and-authorization/) in the wp-graphql docs.

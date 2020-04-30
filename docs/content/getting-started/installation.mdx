@@ -1,0 +1,34 @@
+---
+title: Installation
+description: How to install
+---
+
+## wp-graphql
+
+The plugin is an extension of wp-graphql, so first of all make sure you have this plugin installed.
+
+You can download the plugin [here](https://github.com/wp-graphql/wp-graphql/releases) or install through composer:
+
+```shell
+composer require wp-graphql/wp-graphql
+```
+
+> The minimal supported version of wp-graphql is 0.6.0 and above.
+
+For more information about the usage, check out the [offical plugin's docs](https://docs.wpgraphql.com/getting-started/install-and-activate/).
+
+## wp-graphql-gutenberg
+
+The plugin follows the same installation conventions as the base plugin.
+
+You can download the plugin [here](https://github.com/pristas-peter/wp-graphql-gutenberg/releases) or install through [composer](https://packagist.org/packages/pristas-peter/wp-graphql-gutenberg):
+
+```shell
+composer require pristas-peter/wp-graphql-gutenberg
+```
+
+> Don't forget to activate the plugin after the installation through the admin interface or wp-cli.
+
+## wp-graphql-gutenberg-server
+
+This is an optional server app written in JS which enables an advanced feature to connect with gutenberg without the need of storing the saved metadata in the database first. For more information check out the [overview](/getting-started/overview/) section and [server](/server/overview/) section.

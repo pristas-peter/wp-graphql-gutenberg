@@ -1,5 +1,33 @@
 {
-    "name": "pristas-peter/wp-graphql-gutenberg",
-    "description": "Query gutenberg blocks with wp-graphql",
-    "type": "wordpress-plugin"
+	"name": "pristas-peter/wp-graphql-gutenberg",
+	"description": "Query gutenberg blocks with wp-graphql",
+	"type": "wordpress-plugin",
+	"autoload": {
+		"psr-4": {
+			"WPGraphqlGutenberg\\": "src/"
+		},
+		"classmap": [
+			"src/"
+		]
+	},
+	"config": {
+		"optimize-autoloader": true
+	},
+	"require-dev": {
+		"dealerdirect/phpcodesniffer-composer-installer": "0.5.0",
+		"wp-coding-standards/wpcs": "2.1.1",
+		"phpcompatibility/phpcompatibility-wp": "2.1.0",
+		"squizlabs/php_codesniffer": "3.5.4"
+	},
+	"scripts": {
+		"phpcs-i": [
+			"@php ./vendor/bin/phpcs -i"
+		],
+		"check-cs": [
+			"@php ./vendor/bin/phpcs"
+		],
+		"fix-cs": [
+			"@php ./vendor/bin/phpcbf"
+		]
+	}
 }

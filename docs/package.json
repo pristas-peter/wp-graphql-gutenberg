@@ -1,0 +1,50 @@
+{
+	"name": "wp-graphql-gutenberg-docs",
+	"private": true,
+	"description": "WpGraphQL Gutenberg Documentation",
+	"version": "0.2.0",
+	"contributors": [
+		{
+			"name": "Peter Pristas",
+			"email": "pristas.peter@gmail.com",
+			"url": "https://github.com/pristas-peter"
+		}
+	],
+	"dependencies": {
+		"gatsby": "^2.19.21",
+		"gatsby-plugin-preval": "^1.0.0",
+		"gatsby-plugin-sharp": "^2.6.0",
+		"gatsby-remark-images": "^3.3.0",
+		"gatsby-theme-apollo-docs": "4.1.3",
+		"gatsby-transformer-remark": "^2.8.0",
+		"react": "16.13.1",
+		"react-dom": "16.13.1"
+	},
+	"devDependencies": {
+		"prettier": "^1.19.1"
+	},
+	"keywords": [
+		"wordpress",
+		"gutenberg",
+		"graphql",
+		"wp-graphql"
+	],
+	"license": "MIT",
+	"scripts": {
+		"prestart": "gatsby clean",
+		"build": "gatsby build",
+		"develop": "gatsby develop",
+		"format": "prettier --write \"**/*.{js,jsx,json,md}\"",
+		"start": "npm run develop",
+		"serve": "gatsby serve",
+		"clean": "gatsby clean",
+		"test": "echo \"Write tests! -> https://gatsby.dev/unit-testing\" && exit 1"
+	},
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/pristas-peter/wp-graphql-gutenberg"
+	},
+	"bugs": {
+		"url": "https://github.com/pristas-peter/wp-graphql-gutenberg/issues"
+	}
+}
