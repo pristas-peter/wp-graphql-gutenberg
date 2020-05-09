@@ -89,7 +89,12 @@ class BlockTypes {
 	}
 
 	protected static function register_attributes_types( $block_type, $prefix ) {
-		$definitions = [ $block_type['attributes'] ];
+		$definitions = [];
+
+		if (count($block_type['attributes'])) {
+			array_push($definitions, $block_type['attributes']);
+		}
+
 
 		if ( isset( $block_type['deprecated'] ) ) {
 			foreach ( array_reverse( $block_type['deprecated'] ) as $deprecation ) {
@@ -97,6 +102,10 @@ class BlockTypes {
 					array_push( $definitions, $deprecation['attributes'] );
 				}
 			}
+		}
+
+		if (!count($definitions)) {
+			return null;
 		}
 
 		$types                         = [];
@@ -150,16 +159,21 @@ class BlockTypes {
 
 	protected static function register_block_type( $block_type, $type_registry ) {
 		$name   = self::format_block_name( $block_type['name'] );
-		$fields = [
-			'attributes' => [
-				'type'    => self::register_attributes_types( $block_type, $name ),
+
+		$fields = [];
+
+		$type = self::register_attributes_types( $block_type, $name );
+
+		if ($type) {
+			$fields['attributes'] = [
+				'type'    => $type,
 				'resolve' => function ( $source ) {
 					return array_merge($source['attributes'], [
 						'__type' => $source['__type'],
 					]);
 				},
-			],
-		];
+			];
+		}
 
 		/**
 		 * Filters the fields for block type.
