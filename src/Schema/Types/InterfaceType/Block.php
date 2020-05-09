@@ -27,6 +27,9 @@ class Block {
 							'wp-graphql-gutenberg'
 						),
 					],
+					'clientId'          => [
+						'type'        => [ 'non_null' => 'String' ]
+					],
 					'name'             => [
 						'type'        => [ 'non_null' => 'String' ],
 						'description' => __( 'Name of the block.', 'wp-graphql-gutenberg' ),
