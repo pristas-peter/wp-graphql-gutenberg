@@ -29,5 +29,8 @@
 		"fix-cs": [
 			"@php ./vendor/bin/phpcbf"
 		]
+	},
+	"require": {
+		"wp-graphql/wp-graphql": ">=0.8.4"
 	}
 }
