@@ -6,7 +6,6 @@ $vendorDir = dirname(dirname(__FILE__));
 $baseDir = dirname($vendorDir);
 
 return array(
-    'Dealerdirect\\Composer\\Plugin\\Installers\\PHPCodeSniffer\\Plugin' => $vendorDir . '/dealerdirect/phpcodesniffer-composer-installer/src/Plugin.php',
     'WPGraphQLGutenberg\\Admin\\Editor' => $baseDir . '/src/Admin/Editor.php',
     'WPGraphQLGutenberg\\Admin\\Settings' => $baseDir . '/src/Admin/Settings.php',
     'WPGraphQLGutenberg\\Blocks\\PostMeta' => $baseDir . '/src/Blocks/PostMeta.php',
