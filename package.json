@@ -1,6 +1,6 @@
 {
 	"name": "wp-graphql-gutenberg",
-	"version": "0.2.0",
+	"version": "0.2.1",
 	"private": true,
 	"scripts": {
 		"build": "wp-scripts build",

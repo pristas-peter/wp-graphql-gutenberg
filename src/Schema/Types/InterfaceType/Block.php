@@ -27,6 +27,9 @@ class Block {
 							'wp-graphql-gutenberg'
 						),
 					],
+					'clientId'          => [
+						'type'        => [ 'non_null' => 'String' ]
+					],
 					'name'             => [
 						'type'        => [ 'non_null' => 'String' ],
 						'description' => __( 'Name of the block.', 'wp-graphql-gutenberg' ),
@@ -48,7 +51,7 @@ class Block {
 						'description' => __( 'Inner blocks.', 'wp-graphql-gutenberg' ),
 					],
 					'parent'           => [
-						'type'        => [ 'non_null' => 'BlockEditorContentNode' ],
+						'type'        => [ 'non_null' => 'Node' ],
 						'description' => __( 'Parent post.', 'wp-graphql-gutenberg' ),
 						'resolve'     => function ( $source, $args, $context, $info ) {
 							$id = self::get_parent_id( $source['__post_id'] );

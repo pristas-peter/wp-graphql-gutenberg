@@ -9,7 +9,7 @@ class Scalar {
 		static $type = null;
 
 		if ( $type === null ) {
-			$type = new CustomScalarType([
+			$type = register_graphql_scalar([
 				'name'      => 'BlockAttributesObject',
 				'serialize' => function ( $value ) {
 					return json_encode( $value );
@@ -17,14 +17,14 @@ class Scalar {
 			]);
 		}
 
-		return $type;
+		return 'BlockAttributesObject';
 	}
 
 	public static function BlockAttributesArray() {
 		static $type = null;
 
 		if ( $type === null ) {
-			$type = new CustomScalarType([
+			$type = register_graphql_scalar([
 				'name'      => 'BlockAttributesArray',
 				'serialize' => function ( $value ) {
 					return json_encode( $value );
@@ -32,6 +32,6 @@ class Scalar {
 			]);
 		}
 
-		return $type;
+		return 'BlockAttributesArray';
 	}
 }
