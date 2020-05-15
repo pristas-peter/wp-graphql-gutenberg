@@ -85,6 +85,7 @@ if (!class_exists('WPGraphQLGutenberg')) {
 			$this->setup_constants();
 			$this->setup_autoload();
 
+			new \WPGraphQLGutenberg\Blocks\Revisions();
 			new \WPGraphQLGutenberg\PostTypes\ReusableBlock();
 			new \WPGraphQLGutenberg\PostTypes\BlockEditorPreview();
 			new \WPGraphQLGutenberg\Admin\Editor();
@@ -105,7 +106,7 @@ if (!class_exists('WPGraphQLGutenberg')) {
 			});
 
 			add_filter('graphql_data_loaders', function ($loaders) {
-				$loaders['blocks'] = new BlocksLoader($this->server);
+				$loaders['blocks'] = new BlocksLoader(Registry::get_registry());
 				return $loaders;
 			});
 

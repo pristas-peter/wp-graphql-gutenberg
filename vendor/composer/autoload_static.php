@@ -4,7 +4,7 @@
 
 namespace Composer\Autoload;
 
-class ComposerStaticInit5ed2fedee9d14e56110ef6037b200508
+class ComposerStaticInit5b480072e220f75d8002b1515dcc77a9
 {
     public static $prefixLengthsPsr4 = array (
         'W' => 
@@ -23,17 +23,21 @@ class ComposerStaticInit5ed2fedee9d14e56110ef6037b200508
     public static $classMap = array (
         'WPGraphQLGutenberg\\Admin\\Editor' => __DIR__ . '/../..' . '/src/Admin/Editor.php',
         'WPGraphQLGutenberg\\Admin\\Settings' => __DIR__ . '/../..' . '/src/Admin/Settings.php',
-        'WPGraphQLGutenberg\\Blocks\\PostMeta' => __DIR__ . '/../..' . '/src/Blocks/PostMeta.php',
+        'WPGraphQLGutenberg\\Blocks\\Block' => __DIR__ . '/../..' . '/src/Blocks/Block.php',
         'WPGraphQLGutenberg\\Blocks\\Registry' => __DIR__ . '/../..' . '/src/Blocks/Registry.php',
+        'WPGraphQLGutenberg\\Blocks\\Revisions' => __DIR__ . '/../..' . '/src/Blocks/Revisions.php',
+        'WPGraphQLGutenberg\\Blocks\\UUIDGenerator' => __DIR__ . '/../..' . '/src/Blocks/UUID.php',
         'WPGraphQLGutenberg\\Blocks\\Utils' => __DIR__ . '/../..' . '/src/Blocks/Utils.php',
+        'WPGraphQLGutenberg\\Data\\BlocksConnectionResolver' => __DIR__ . '/../..' . '/src/Data/BlocksConnectionResolver.php',
+        'WPGraphQLGutenberg\\Data\\BlocksConnectionResolverType' => __DIR__ . '/../..' . '/src/Data/BlocksConnectionResolver.php',
         'WPGraphQLGutenberg\\Data\\BlocksLoader' => __DIR__ . '/../..' . '/src/Data/BlocksLoader.php',
-        'WPGraphQLGutenberg\\Data\\StaleContentException' => __DIR__ . '/../..' . '/src/Data/BlocksLoader.php',
         'WPGraphQLGutenberg\\PostTypes\\BlockEditorPreview' => __DIR__ . '/../..' . '/src/PostTypes/BlockEditorPreview.php',
         'WPGraphQLGutenberg\\PostTypes\\ReusableBlock' => __DIR__ . '/../..' . '/src/PostTypes/ReusableBlock.php',
         'WPGraphQLGutenberg\\Rest\\Rest' => __DIR__ . '/../..' . '/src/Rest/Rest.php',
         'WPGraphQLGutenberg\\Schema\\Schema' => __DIR__ . '/../..' . '/src/Schema/Schema.php',
         'WPGraphQLGutenberg\\Schema\\Types\\BlockTypes' => __DIR__ . '/../..' . '/src/Schema/Types/BlockTypes.php',
         'WPGraphQLGutenberg\\Schema\\Types\\Connection\\BlockEditorContentNodeConnection' => __DIR__ . '/../..' . '/src/Schema/Types/Connection/BlockEditorContentNodeConnection.php',
+        'WPGraphQLGutenberg\\Schema\\Types\\Connection\\BlocksConnection' => __DIR__ . '/../..' . '/src/Schema/Types/Connection/BlocksConnection.php',
         'WPGraphQLGutenberg\\Schema\\Types\\InterfaceType\\Block' => __DIR__ . '/../..' . '/src/Schema/Types/InterfaceType/Block.php',
         'WPGraphQLGutenberg\\Schema\\Types\\InterfaceType\\BlockEditorContentNode' => __DIR__ . '/../..' . '/src/Schema/Types/InterfaceType/BlockEditorContentNode.php',
         'WPGraphQLGutenberg\\Schema\\Types\\Object\\ReusableBlock' => __DIR__ . '/../..' . '/src/Schema/Types/Object/ReusableBlock.php',
@@ -46,9 +50,9 @@ class ComposerStaticInit5ed2fedee9d14e56110ef6037b200508
     public static function getInitializer(ClassLoader $loader)
     {
         return \Closure::bind(function () use ($loader) {
-            $loader->prefixLengthsPsr4 = ComposerStaticInit5ed2fedee9d14e56110ef6037b200508::$prefixLengthsPsr4;
-            $loader->prefixDirsPsr4 = ComposerStaticInit5ed2fedee9d14e56110ef6037b200508::$prefixDirsPsr4;
-            $loader->classMap = ComposerStaticInit5ed2fedee9d14e56110ef6037b200508::$classMap;
+            $loader->prefixLengthsPsr4 = ComposerStaticInit5b480072e220f75d8002b1515dcc77a9::$prefixLengthsPsr4;
+            $loader->prefixDirsPsr4 = ComposerStaticInit5b480072e220f75d8002b1515dcc77a9::$prefixDirsPsr4;
+            $loader->classMap = ComposerStaticInit5b480072e220f75d8002b1515dcc77a9::$classMap;
 
         }, null, ClassLoader::class);
     }

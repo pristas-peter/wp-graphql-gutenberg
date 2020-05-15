@@ -59,95 +59,77 @@ class Settings extends Component {
 				isBusy: true,
 			},
 			() => {
-				apiFetch( {
-					path: 'wp-graphql-gutenberg/v1/stale-posts',
-				} )
-					.then( ( data ) => {
-						if ( ! data.length ) {
-							return;
-						}
+				const iframe = document.createElement( 'iframe' );
 
-						const iframe = document.createElement( 'iframe' );
+				const context = {
+					timeout: null,
+				};
 
-						const context = {
-							timeout: null,
+				const timeoutPromise = new Promise( ( _, reject ) => {
+					context.timeout = setTimeout( reject, 1000 * 15 );
+				} );
+
+				return Promise.race( [
+					new Promise( ( resolve, reject ) => {
+						iframe.setAttribute( 'style', 'display: none;' );
+						iframe.setAttribute(
+							'src',
+							`${ window.wpGraphqlGutenberg.adminUrl }post-new.php?post_type=${ window.wpGraphqlGutenberg.adminPostType }&action=edit&wpGraphqlGutenbergServer=true`
+						);
+
+						iframe.admin = {
+							queue: [
+								{
+									action: actions.HEARTBEAT,
+									onComplete: () => {
+										clearTimeout( context.timeout );
+									},
+									onError: reject,
+								},
+								{
+									options: { data },
+									action: actions.GET_BLOCK_REGISTRY,
+									onComplete: ( result ) => {
+										apiFetch( {
+											path: 'wp-graphql-gutenberg/v1/block-registry',
+											method: 'POST',
+											data: result,
+										} )
+											.then( resolve )
+											.catch( reject );
+									},
+									onError: reject,
+								},
+							],
 						};
 
-						const timeoutPromise = new Promise( ( _, reject ) => {
-							context.timeout = setTimeout( reject, 1000 * 15 );
-						} );
-
-						return Promise.race( [
-							new Promise( ( resolve, reject ) => {
-								iframe.setAttribute(
-									'style',
-									'display: none;'
-								);
-								iframe.setAttribute(
-									'src',
-									`${ window.wpGraphqlGutenberg.adminUrl }post-new.php?post_type=${ window.wpGraphqlGutenberg.adminPostType }&action=edit&wpGraphqlGutenbergServer=true`
-								);
-
-								iframe.admin = {
-									queue: [
-										{
-											action: actions.HEARTBEAT,
-											onComplete: () => {
-												clearTimeout( context.timeout );
-											},
-											onError: reject,
-										},
-										{
-											options: { data },
-											action: actions.PARSE_BATCH,
-											onComplete: ( result ) => {
-												apiFetch( {
-													path:
-														'wp-graphql-gutenberg/v1/blocks/batch',
-													method: 'POST',
-													data: result,
-												} )
-													.then( resolve )
-													.catch( reject );
-											},
-											onError: reject,
-										},
-									],
-								};
-
-								iframe.onerror = reject;
-								document.body.appendChild( iframe );
-							} ).finally( () => {
-								if ( iframe.parentNode ) {
-									iframe.parentNode.removeChild( iframe );
-								}
-							} ),
-							timeoutPromise,
-						] );
-					} )
-					.then( () => {
-						createNotice( {
-							status: 'success',
-							content: __(
-								'All stale content has been updated.'
-							),
-						} );
-					} )
-					.catch( ( err ) => {
-						createErrorNotice(
-							( err && err.message ) ||
-								__( 'Update failed.', 'wp-graphql-gutenberg' )
-						);
-					} )
-					.finally( () => {
-						this.setState( {
-							isBusy: false,
-							total: null,
-							progress: null,
-						} );
-					} );
+						iframe.onerror = reject;
+						document.body.appendChild( iframe );
+					} ).finally( () => {
+						if ( iframe.parentNode ) {
+							iframe.parentNode.removeChild( iframe );
+						}
+					} ),
+					timeoutPromise,
+				] );
 			}
-		);
+		)
+			.then( () => {
+				createNotice( {
+					status: 'success',
+					content: __( 'Block registry has been updated.', 'wp-graphql-gutenberg' ),
+				} );
+			} )
+			.catch( ( err ) => {
+				createErrorNotice( ( err && err.message ) || __( 'Update failed.', 'wp-graphql-gutenberg' ) );
+			} )
+			.finally( () => {
+				this.setState( {
+					isBusy: false,
+					total: null,
+					progress: null,
+				} );
+			} );
 	}
 
 	render() {
@@ -156,23 +138,13 @@ class Settings extends Component {
 
 		return (
 			<Container>
-				<Heading>
-					{ __(
-						'WP GraphQL Gutenberg Admin',
-						'wp-graphql-gutenberg'
-					) }
-				</Heading>
+				<Heading>{ __( 'WP GraphQL Gutenberg Admin', 'wp-graphql-gutenberg' ) }</Heading>
 				{ noticeUI }
 				<TableContainer>
 					<Table>
 						<TBody>
 							<TRow>
-								<TData>
-									{ __(
-										'Update all posts with stale content',
-										'wp-graphql-gutenberg'
-									) }
-								</TData>
+								<TData>{ __( 'Update block registry', 'wp-graphql-gutenberg' ) }</TData>
 								<TData>
 									<Button
 										isPrimary={ true }
@@ -181,15 +153,11 @@ class Settings extends Component {
 										onClick={ this.onUpdate }
 										disabled={ isBusy }
 									>
-										{ __(
-											'Update',
-											'wp-graphql-gutenberg'
-										) }
+										{ __( 'Update', 'wp-graphql-gutenberg' ) }
 									</Button>
 								</TData>
 								<TData>
-									{ this.state.progress !== null &&
-									this.state.total !== null
+									{ this.state.progress !== null && this.state.total !== null
 										? `${ this.state.progress } / ${ this.state.total }`
 										: null }
 								</TData>

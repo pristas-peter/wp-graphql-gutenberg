@@ -1,18 +1,23 @@
 import { unmountComponentAtNode } from '@wordpress/element';
-import { getBlockTypes, getSaveContent, parse } from '@wordpress/blocks';
+import { applyFilters } from '@wordpress/hooks';
+import { getBlockTypes, parse } from '@wordpress/blocks';
+import { createVisitor as createUUIDVisitor } from '../blocks/uuid';
+
+export const createVisitor = createUUIDVisitor;
 
 export const IS_SERVER_PARAM = 'wpGraphqlGutenbergServer';
 
-export const visitBlocks = ( { blocks, visitor } ) => {
-	blocks.forEach( ( block ) => {
-		visitor( block );
+export const visitBlocks = ( { blocks = [], visitor } ) => {
+	return blocks.map( ( block ) => {
+		const innerBlocks = visitBlocks( {
+			blocks: block.innerBlocks || [],
+			visitor,
+		} );
 
-		if ( block.innerBlocks ) {
-			visitBlocks( { blocks: block.innerBlocks, visitor } );
-		}
+		const visited = visitor( block );
+		visited.innerBlocks = innerBlocks;
+		return applyFilters( 'wpGraphqlGutenberg.visitorBlock', visited, blocks );
 	} );
-
-	return blocks;
 };
 
 // waits upon gutenberg initialization (block library)
@@ -37,18 +42,11 @@ export const getBlockRegistry = () => {
 	);
 };
 
-// get blocks rendered output with inner blocks included
-export const getBlockSaveContent = ( { block } ) => {
-	return getSaveContent( block.name, block.attributes, block.innerBlocks );
-};
-
 // parse post content to blocks array
-export const getBlocks = ( { postContent } ) => {
+export const getBlocks = ( { postContent, id } ) => {
 	return visitBlocks( {
 		blocks: parse( postContent ),
-		visitor: ( block ) => {
-			block.saveContent = getBlockSaveContent( { block } );
-		},
+		visitor: createVisitor( { id } ),
 	} );
 };
 
@@ -58,9 +56,10 @@ export const createBatch = ( { contentById } ) => {
 		batch: Object.keys( contentById ).reduce( ( obj, id ) => {
 			const postContent = contentById[ id ];
 
+			const blocks = getBlocks( { postContent, id } );
+
 			obj[ id ] = {
-				blocks: getBlocks( { postContent } ),
-				post_content: postContent,
+				blocks,
 			};
 
 			return obj;

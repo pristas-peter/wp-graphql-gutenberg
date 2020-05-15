@@ -2,66 +2,76 @@
 
 namespace WPGraphQLGutenberg\Data;
 
-use GraphQL\Deferred;
-use GraphQL\Error\ClientAware;
-use WPGraphQLGutenberg\Blocks\PostMeta;
+use GraphQLRelay\Relay;
+use WPGraphQL\Data\Loader\AbstractDataLoader;
+use WPGraphQLGutenberg\Blocks\Block;
 use WPGraphQLGutenberg\Blocks\Registry;
+use WPGraphQLGutenberg\Blocks\Utils;
 
-class StaleContentException extends \Exception implements ClientAware {
-	public function isClientSafe() {
-		return true;
-	}
+class BlocksLoader extends AbstractDataLoader {
+	public function get_post_blocks($id) {
+		static $cache = [];
 
-	public function getCategory() {
-		return 'gutenberg';
-	}
-}
-
-class BlocksLoader {
-	private static function ensure_not_stale( $id, $data ) {
-		if ( empty( $data ) ) {
-			throw new StaleContentException( __( 'Blocks content is not sourced.', 'wp-graphql-gutenberg' ) );
+		if (!empty($cache[$id])) {
+			return $cache[$id];
 		}
 
-		if ( PostMeta::is_data_stale( $id, $data ) ) {
-			throw new StaleContentException( __( 'Blocks content is stale.', 'wp-graphql-gutenberg' ) );
+		$blocks = Block::create_blocks(parse_blocks(get_post($id)->post_content), $id, Registry::get_registry());
+		$cache[$id] = $blocks;
+
+		return $blocks;
+	}
+
+	public function get_id($id) {
+		static $cache = [];
+
+		if (!empty($cache[$id])) {
+			return $id;
 		}
 
-		return $data;
-	}
+		$decoded = Block::decode_id($id);
 
-	private $server;
-	private $is_loading         = false;
-	private $post_content_by_id = [];
+		$context = [
+			'block' => null
+		];
 
-	public function __construct( $server ) {
-		$this->server = $server;
-	}
-
-	public function add( $id ) {
-		if ( $this->server->enabled() ) {
-			$data         = PostMeta::get_post( $id );
-			$registry     = Registry::get_registry();
-			$post_content = get_post( $id )->post_content;
-
-			if ( $data['post_content'] === $post_content && json_encode( $data['registry'] ) === json_encode( $registry ) ) {
-				return;
+		Utils::visit_blocks($this->get_post_blocks($decoded['ID']), function ($block) use (&$decoded, &$context) {
+			if ($block->attributes['wpGraphqlUUID'] === $decoded['UUID']) {
+				$context['block'] = $block;
 			}
+		});
 
-			$this->post_content_by_id[ $id ] = $post_content;
-		}
+		$cache[$id] = $context['block'];
+
+		return $context['block'];
 	}
 
-	public function load() {
-		if ( $this->server->enabled() && ! empty( $this->post_content_by_id ) && ! $this->is_loading ) {
-			$this->is_loading = true;
-			$data             = $this->server->get_batch( $this->post_content_by_id );
-			PostMeta::update_batch( $data['batch'], Registry::get_registry() );
-		}
+	public function __construct($registry) {
+		$this->registry = $registry;
 	}
 
-	public function get( $id ) {
-		$data = self::ensure_not_stale( $id, PostMeta::get_post( $id ) );
-		return $data['blocks'];
+	public function loadKeys(array $keys) {
+		$result = [];
+
+		foreach ($keys as $key) {
+			$result[$key] = $this->get_id($key);
+		}
+
+		return $result;
 	}
 }
+
+// class EnqueuedScriptLoader extends AbstractDataLoader {
+// 	public function loadKeys( array $keys ) {
+// 		global $wp_scripts;
+// 		$loaded = [];
+// 		foreach ( $keys as $key ) {
+// 			if ( isset( $wp_scripts->registered[ $key ] ) ) {
+// 				$loaded[ $key ] = $wp_scripts->registered[ $key ];
+// 			} else {
+// 				$loaded[ $key ] = null;
+// 			}
+// 		}
+// 		return $loaded;
+// 	}
+// }

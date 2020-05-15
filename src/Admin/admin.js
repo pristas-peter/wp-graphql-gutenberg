@@ -1,9 +1,9 @@
 import { __ } from '@wordpress/i18n';
-import { getBlocks, getBlockRegistry } from '../Server/server';
+import { getBlockRegistry } from '../Server/server';
 
 export const actions = {
 	HEARTBEAT: 'HEARTBEAT',
-	PARSE_BATCH: 'PARSE_BATCH',
+	GET_BLOCK_REGISTRY: 'GET_BLOCK_REGISTRY',
 };
 
 export const checkIframeAdmin = () => {
@@ -15,32 +15,11 @@ export const checkIframeAdmin = () => {
 					case actions.HEARTBEAT:
 						onComplete();
 						break;
-					case actions.PARSE_BATCH:
-						onComplete( {
-							batch: options.data.reduce(
-								// eslint-disable-next-line camelcase
-								( batch, { id, post_content } ) => {
-									batch[ id ] = {
-										post_content,
-										blocks: getBlocks( {
-											postContent: post_content,
-										} ),
-									};
-
-									return batch;
-								},
-								{}
-							),
-							block_types: getBlockRegistry(),
-						} );
-
+					case actions.GET_BLOCK_REGISTRY:
+						onComplete( getBlockRegistry() );
 						break;
 					default:
-						onError(
-							new Error(
-								__( 'Invalid action', 'wp-graphql-gutenberg' )
-							)
-						);
+						onError( new Error( __( 'Invalid action', 'wp-graphql-gutenberg' ) ) );
 				}
 			} catch ( error ) {
 				onError( error );
