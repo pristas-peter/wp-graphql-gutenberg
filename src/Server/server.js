@@ -1,18 +1,20 @@
 import { unmountComponentAtNode } from '@wordpress/element';
-import { getBlockTypes, getSaveContent, parse } from '@wordpress/blocks';
+import { applyFilters } from '@wordpress/hooks';
+import { getBlockTypes } from '@wordpress/blocks';
 
 export const IS_SERVER_PARAM = 'wpGraphqlGutenbergServer';
 
-export const visitBlocks = ( { blocks, visitor } ) => {
-	blocks.forEach( ( block ) => {
-		visitor( block );
+export const visitBlocks = ( { blocks = [], visitor } ) => {
+	return blocks.map( ( block ) => {
+		const innerBlocks = visitBlocks( {
+			blocks: block.innerBlocks || [],
+			visitor,
+		} );
 
-		if ( block.innerBlocks ) {
-			visitBlocks( { blocks: block.innerBlocks, visitor } );
-		}
+		const visited = visitor( block );
+		visited.innerBlocks = innerBlocks;
+		return applyFilters( 'wpGraphqlGutenberg.visitorBlock', visited, blocks );
 	} );
-
-	return blocks;
 };
 
 // waits upon gutenberg initialization (block library)
@@ -35,35 +37,4 @@ export const getBlockRegistry = () => {
 			getBlockTypes().map( ( { icon, transforms, ...rest } ) => rest ) // eslint-disable-line no-unused-vars
 		)
 	);
-};
-
-// get blocks rendered output with inner blocks included
-export const getBlockSaveContent = ( { block } ) => {
-	return getSaveContent( block.name, block.attributes, block.innerBlocks );
-};
-
-// parse post content to blocks array
-export const getBlocks = ( { postContent } ) => {
-	return visitBlocks( {
-		blocks: parse( postContent ),
-		visitor: ( block ) => {
-			block.saveContent = getBlockSaveContent( { block } );
-		},
-	} );
-};
-
-export const createBatch = ( { contentById } ) => {
-	return {
-		block_types: getBlockRegistry(),
-		batch: Object.keys( contentById ).reduce( ( obj, id ) => {
-			const postContent = contentById[ id ];
-
-			obj[ id ] = {
-				blocks: getBlocks( { postContent } ),
-				post_content: postContent,
-			};
-
-			return obj;
-		}, {} ),
-	};
 };

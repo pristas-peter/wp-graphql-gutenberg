@@ -8,11 +8,10 @@ $baseDir = dirname($vendorDir);
 return array(
     'WPGraphQLGutenberg\\Admin\\Editor' => $baseDir . '/src/Admin/Editor.php',
     'WPGraphQLGutenberg\\Admin\\Settings' => $baseDir . '/src/Admin/Settings.php',
-    'WPGraphQLGutenberg\\Blocks\\PostMeta' => $baseDir . '/src/Blocks/PostMeta.php',
+    'WPGraphQLGutenberg\\Blocks\\Block' => $baseDir . '/src/Blocks/Block.php',
     'WPGraphQLGutenberg\\Blocks\\Registry' => $baseDir . '/src/Blocks/Registry.php',
+    'WPGraphQLGutenberg\\Blocks\\RegistryNotSourcedException' => $baseDir . '/src/Blocks/Registry.php',
     'WPGraphQLGutenberg\\Blocks\\Utils' => $baseDir . '/src/Blocks/Utils.php',
-    'WPGraphQLGutenberg\\Data\\BlocksLoader' => $baseDir . '/src/Data/BlocksLoader.php',
-    'WPGraphQLGutenberg\\Data\\StaleContentException' => $baseDir . '/src/Data/BlocksLoader.php',
     'WPGraphQLGutenberg\\PostTypes\\BlockEditorPreview' => $baseDir . '/src/PostTypes/BlockEditorPreview.php',
     'WPGraphQLGutenberg\\PostTypes\\ReusableBlock' => $baseDir . '/src/PostTypes/ReusableBlock.php',
     'WPGraphQLGutenberg\\Rest\\Rest' => $baseDir . '/src/Rest/Rest.php',

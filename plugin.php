@@ -14,7 +14,6 @@
 namespace WPGraphQLGutenberg;
 
 use WPGraphQLGutenberg\Blocks\Registry;
-use WPGraphQLGutenberg\Data\BlocksLoader;
 
 if (!defined('ABSPATH')) {
 	die('Silence is golden.');
@@ -102,11 +101,6 @@ if (!class_exists('WPGraphQLGutenberg')) {
 				}
 
 				return $request_data;
-			});
-
-			add_filter('graphql_data_loaders', function ($loaders) {
-				$loaders['blocks'] = new BlocksLoader($this->server);
-				return $loaders;
 			});
 
 			register_deactivation_hook(__FILE__, function () {
