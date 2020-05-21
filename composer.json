@@ -31,6 +31,6 @@
 		]
 	},
 	"require": {
-		"wp-graphql/wp-graphql": ">=0.8.4"
+		"wp-graphql/wp-graphql": ">=0.9.0"
 	}
 }
