@@ -3,20 +3,13 @@
 namespace WPGraphQLGutenberg\Admin;
 
 use WPGraphQLGutenberg\Admin\Editor;
-use WPGraphQLGutenberg\Blocks\PostMeta;
-use WPGraphQLGutenberg\Blocks\Utils;
 use WPGraphQLGutenberg\PostTypes\BlockEditorPreview;
 
 class Settings {
-	function is_stale( $id ) {
-		$data = PostMeta::get_post( $id );
-		return empty( $data ) || PostMeta::is_data_stale( $id, $data );
-	}
-
 	function __construct() {
 		add_action('admin_menu', function () {
 			add_menu_page(
-				__( 'GraphQL Gutenberg', 'wp-graphql-gutenberg' ),
+				__('GraphQL Gutenberg', 'wp-graphql-gutenberg'),
 				'GraphQL Gutenberg',
 				'manage_options',
 				'wp-graphql-gutenberg-admin',
@@ -27,82 +20,18 @@ class Settings {
 			);
 		});
 
-		add_action('admin_enqueue_scripts', function ( $hook ) {
-			if ( ! preg_match( '/.+wp-graphql-gutenberg-admin$/', $hook ) ) {
+		add_action('admin_enqueue_scripts', function ($hook) {
+			if (!preg_match('/.+wp-graphql-gutenberg-admin$/', $hook)) {
 				return;
 			}
 
-			wp_enqueue_style( 'wp-components' );
+			wp_enqueue_style('wp-components');
 
 			Editor::enqueue_script();
 
 			wp_localize_script(Editor::$script_name, 'wpGraphqlGutenberg', [
 				'adminPostType' => BlockEditorPreview::post_type(),
-				'adminUrl'      => get_admin_url(),
-			]);
-		});
-
-		add_action('rest_api_init', function () {
-			register_rest_route('wp-graphql-gutenberg/v1', '/stale-posts', [
-				'methods'             => 'GET',
-				'callback'            => function () {
-					$args = [
-						'post_type'      => array_merge( Utils::get_editor_post_types() ),
-						'posts_per_page' => -1,
-						'post_status'    => 'any',
-					];
-
-					$query = new \WP_Query( $args );
-
-					$data = [];
-
-					foreach ( $query->get_posts() as $post ) {
-						if ( $this->is_stale( $post->ID ) ) {
-							$data[] = [
-								'id'           => $post->ID,
-								'post_content' => $post->post_content,
-							];
-						}
-
-						foreach ( wp_get_post_revisions( $post ) as $revision ) {
-							if ( $this->is_stale( $revision->ID ) ) {
-								$data[] = [
-									'id'           => $revision->ID,
-									'post_content' => $revision->post_content,
-								];
-							}
-						}
-					}
-
-					return rest_ensure_response( $data );
-				},
-				'permission_callback' => function () {
-					return apply_filters(
-						'graphql_gutenberg_user_can_update_stale_content',
-						in_array( 'administrator', wp_get_current_user()->roles, true )
-					);
-				},
-				'schema'              => [
-					'$schema' => 'http://json-schema.org/draft-04/schema#',
-					// The title property marks the identity of the resource.
-					'title'   => 'Posts which support editor',
-					'type'    => 'array',
-					// In JSON Schema you can specify object properties in the properties attribute.
-					'items'   => [
-						'type'  => 'array',
-						'items' => [
-							'type'       => 'object',
-							'properties' => [
-								'id'           => [
-									'type' => 'integer',
-								],
-								'post_content' => [
-									'type' => 'string',
-								],
-							],
-						],
-					],
-				],
+				'adminUrl' => get_admin_url()
 			]);
 		});
 	}

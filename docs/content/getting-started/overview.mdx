@@ -98,17 +98,12 @@ const blocks = [
 
 Gutenberg's main issue lies within its client-side only architecture for registering/validating blocks. This way the block registry and block definitions are only available in the editor itself but not available from the PHP side of WordPress. This exposes many challenges on how to actually expose this information outside of WordPress.
 
-> There is also a wordpress's php `parse_blocks()` function. However it does not respect many aspects of block parsing which are evaluated inside gutenberg like attributes parsed from html nodes or block validation. Also there is no `block_type registry` on the server, so you have no way to know how the blocks are defined.
+## How can the block registry be used from server?
 
-## How are the editor data available through GraphQL then?
+The plugin is able to serialize the block registry inside gutenberg and save it with the help of REST API to the database. To load the registry, one can:
 
-Since gutenberg uses WP REST API, this plugin intercepts these requests when needed and adds its own metadata to request's payload. The metadata contains block type definitions from the registry and parsed blocks. These are than processed on the server side and saved to post's meta and options respectively.
-
-## What can I do when I already have some content, but is missing the required metadata, or metadata is out of sync?
-
-The plugin is able to detect these situations an errors out with content is stale exception when resolving. To fix this situation, you have two options:
-
-- use the plugin's admin settings page which has the ability to query the server for stale content, open the gutenberg inside hidden iframe and use it to update the stale metadata
+- just open any post any gutenberg and the registry is updated behind the scenes
+- use the plugin's admin settings page which has the ability to open gutenberg inside hidden iframe and use it to fetch and update the registry
 - use the optional javascript server app, which opens up gutenberg with the help of headless browser and returns the data seamlessly as if they were stored inside database
 
 > Checkout out the [server](/server/overview/) section if you are intersted in how the server app works and how to use it.

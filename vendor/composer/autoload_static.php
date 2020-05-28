@@ -4,7 +4,7 @@
 
 namespace Composer\Autoload;
 
-class ComposerStaticInit5ed2fedee9d14e56110ef6037b200508
+class ComposerStaticInit5b480072e220f75d8002b1515dcc77a9
 {
     public static $prefixLengthsPsr4 = array (
         'W' => 
@@ -23,11 +23,10 @@ class ComposerStaticInit5ed2fedee9d14e56110ef6037b200508
     public static $classMap = array (
         'WPGraphQLGutenberg\\Admin\\Editor' => __DIR__ . '/../..' . '/src/Admin/Editor.php',
         'WPGraphQLGutenberg\\Admin\\Settings' => __DIR__ . '/../..' . '/src/Admin/Settings.php',
-        'WPGraphQLGutenberg\\Blocks\\PostMeta' => __DIR__ . '/../..' . '/src/Blocks/PostMeta.php',
+        'WPGraphQLGutenberg\\Blocks\\Block' => __DIR__ . '/../..' . '/src/Blocks/Block.php',
         'WPGraphQLGutenberg\\Blocks\\Registry' => __DIR__ . '/../..' . '/src/Blocks/Registry.php',
+        'WPGraphQLGutenberg\\Blocks\\RegistryNotSourcedException' => __DIR__ . '/../..' . '/src/Blocks/Registry.php',
         'WPGraphQLGutenberg\\Blocks\\Utils' => __DIR__ . '/../..' . '/src/Blocks/Utils.php',
-        'WPGraphQLGutenberg\\Data\\BlocksLoader' => __DIR__ . '/../..' . '/src/Data/BlocksLoader.php',
-        'WPGraphQLGutenberg\\Data\\StaleContentException' => __DIR__ . '/../..' . '/src/Data/BlocksLoader.php',
         'WPGraphQLGutenberg\\PostTypes\\BlockEditorPreview' => __DIR__ . '/../..' . '/src/PostTypes/BlockEditorPreview.php',
         'WPGraphQLGutenberg\\PostTypes\\ReusableBlock' => __DIR__ . '/../..' . '/src/PostTypes/ReusableBlock.php',
         'WPGraphQLGutenberg\\Rest\\Rest' => __DIR__ . '/../..' . '/src/Rest/Rest.php',
@@ -46,9 +45,9 @@ class ComposerStaticInit5ed2fedee9d14e56110ef6037b200508
     public static function getInitializer(ClassLoader $loader)
     {
         return \Closure::bind(function () use ($loader) {
-            $loader->prefixLengthsPsr4 = ComposerStaticInit5ed2fedee9d14e56110ef6037b200508::$prefixLengthsPsr4;
-            $loader->prefixDirsPsr4 = ComposerStaticInit5ed2fedee9d14e56110ef6037b200508::$prefixDirsPsr4;
-            $loader->classMap = ComposerStaticInit5ed2fedee9d14e56110ef6037b200508::$classMap;
+            $loader->prefixLengthsPsr4 = ComposerStaticInit5b480072e220f75d8002b1515dcc77a9::$prefixLengthsPsr4;
+            $loader->prefixDirsPsr4 = ComposerStaticInit5b480072e220f75d8002b1515dcc77a9::$prefixDirsPsr4;
+            $loader->classMap = ComposerStaticInit5b480072e220f75d8002b1515dcc77a9::$classMap;
 
         }, null, ClassLoader::class);
     }

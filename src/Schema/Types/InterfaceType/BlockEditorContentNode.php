@@ -3,8 +3,9 @@
 namespace WPGraphQLGutenberg\Schema\Types\InterfaceType;
 
 use GraphQL\Deferred;
+use WPGraphQLGutenberg\Blocks\Block;
 use WPGraphQLGutenberg\Schema\Utils;
-use WPGraphQLGutenberg\Blocks\PostMeta;
+use WPGraphQLGutenberg\Blocks\Registry;
 use WPGraphQLGutenberg\PostTypes\BlockEditorPreview;
 
 class BlockEditorContentNode {
@@ -18,28 +19,24 @@ class BlockEditorContentNode {
 				],
 				'description' => __('Gutenberg blocks', 'wp-graphql-gutenberg'),
 				'resolve' => function ($model, $args, $context, $info) {
-					$loader = $context->loaders['blocks'];
-					$id = $model->ID;
-					$loader->add($id);
-
-					return new Deferred(function () use (&$loader, $id) {
-						$loader->load();
-						return $loader->get($id);
-					});
+					return Block::create_blocks(
+						parse_blocks(get_post($model->ID)->post_content),
+						$model->ID,
+						Registry::get_registry()
+					);
 				}
 			],
 			'blocksJSON' => [
 				'type' => 'String',
 				'description' => __('Gutenberg blocks as json string', 'wp-graphql-gutenberg'),
 				'resolve' => function ($model, $args, $context, $info) {
-					$loader = $context->loaders['blocks'];
-					$id = $model->ID;
-					$loader->add($id);
+					$blocks = Block::create_blocks(
+						parse_blocks(get_post($model->ID)->post_content),
+						$model->ID,
+						Registry::get_registry()
+					);
 
-					return new Deferred(function () use (&$loader, $id) {
-						$loader->load();
-						return json_encode($loader->get($id));
-					});
+					return json_encode($blocks);
 				}
 			],
 			'previewBlocks' => [
@@ -52,7 +49,11 @@ class BlockEditorContentNode {
 						$id = BlockEditorPreview::get_preview_id($model->ID, $model->ID);
 
 						if (!empty($id)) {
-							return PostMeta::get_post($id)['blocks'];
+							return Block::create_blocks(
+								parse_blocks(get_post($id)->post_content),
+								$id,
+								Registry::get_registry()
+							);
 						}
 
 						return null;
@@ -70,7 +71,13 @@ class BlockEditorContentNode {
 						$id = BlockEditorPreview::get_preview_id($model->ID, $model->ID);
 
 						if (!empty($id)) {
-							return json_encode(PostMeta::get_post($id)['blocks']);
+							return json_encode(
+								Block::create_blocks(
+									parse_blocks(get_post($id)->post_content),
+									$id,
+									Registry::get_registry()
+								)
+							);
 						}
 
 						return null;
