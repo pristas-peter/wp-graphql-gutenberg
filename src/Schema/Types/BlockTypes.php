@@ -101,8 +101,8 @@ class BlockTypes {
 
 				$fields[$name] = [
 					'type' => $type,
-					'resolve' => function ($source, $args, $context, $info) use ($name, $default_value) {
-						return $source[$name] ?? $default_value;
+					'resolve' => function ($attributes, $args, $context, $info) use ($name, $default_value) {
+						return $attributes[$name] ?? $default_value;
 					}
 				];
 			}
@@ -164,14 +164,8 @@ class BlockTypes {
 
 			register_graphql_union_type($type, [
 				'typeNames' => $types,
-				'resolveType' => function ($source) use ($types_by_definition, $non_deprecated_definition_key) {
-					$result = $types_by_definition[json_encode($source['__type']['attributes'])] ?? null;
-
-					if ($result === null) {
-						return $types_by_definition[$non_deprecated_definition_key];
-					}
-
-					return $result;
+				'resolveType' => function ($attributes) use ($types_by_definition) {
+					return $types_by_definition[json_encode($attributes['__type'])];
 				}
 			]);
 
@@ -191,10 +185,8 @@ class BlockTypes {
 		if ($type) {
 			$fields['attributes'] = [
 				'type' => $type,
-				'resolve' => function ($source) {
-					return array_merge($source['attributes'], [
-						'__type' => $source['__type']
-					]);
+				'resolve' => function ($block) {
+					return array_merge($block->attributes, ['__type' => $block->attributesType]);
 				}
 			];
 		}
@@ -220,7 +212,7 @@ class BlockTypes {
 		add_action('graphql_register_types', function ($type_registry) {
 			add_filter('graphql_CoreBlock_fields', function ($fields) {
 				$fields['reusableBlock'] = [
-					'type' => ['non_null' => 'ReusableBlock'],
+					'type' => ['non_null' => 'Node'],
 					'resolve' => function ($source, $args, $context, $info) {
 						$id = $source['attributes']['ref'];
 						$resolve = Utils::get_post_resolver($id);
@@ -239,6 +231,13 @@ class BlockTypes {
 			foreach ($registry as $block_name => $block_type) {
 				$type_names[] = self::register_block_type($block_type, $type_registry);
 			}
+
+			register_graphql_union_type('BlockUnion', [
+				'typeNames' => $type_names,
+				'resolveType' => function ($block) use ($type_registry) {
+					return self::format_block_name($block->name);
+				}
+			]);
 
 			add_filter(
 				'graphql_schema_config',

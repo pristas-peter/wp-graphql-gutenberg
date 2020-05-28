@@ -6,7 +6,7 @@
  * Description: Enable blocks in WP GraphQL.
  * Author: pristas-peter
  * Author URI:
- * Version: 0.2.2
+ * Version: 0.3.0
  * License: GPL-3
  * License URI: https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -14,7 +14,6 @@
 namespace WPGraphQLGutenberg;
 
 use WPGraphQLGutenberg\Blocks\Registry;
-use WPGraphQLGutenberg\Data\BlocksLoader;
 
 if (!defined('ABSPATH')) {
 	die('Silence is golden.');
@@ -102,11 +101,6 @@ if (!class_exists('WPGraphQLGutenberg')) {
 				}
 
 				return $request_data;
-			});
-
-			add_filter('graphql_data_loaders', function ($loaders) {
-				$loaders['blocks'] = new BlocksLoader($this->server);
-				return $loaders;
 			});
 
 			register_deactivation_hook(__FILE__, function () {
