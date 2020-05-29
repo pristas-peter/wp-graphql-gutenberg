@@ -145,7 +145,9 @@ class Block implements ArrayAccess {
 		$this->originalContent = self::strip_newlines($data['innerHTML']);
 		$this->saveContent = self::parse_inner_content($data);
 		$this->order = $order;
-		$this->parent = $parent;
+		$this->get_parent = function () use (&$parent) {
+			return $parent;
+		};
 
 		$result = self::parse_attributes($data, $this->blockType);
 
