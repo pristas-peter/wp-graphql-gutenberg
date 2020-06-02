@@ -1,0 +1,215 @@
+[
+    {
+        "name": "opis/json-schema",
+        "version": "1.0.18",
+        "version_normalized": "1.0.18.0",
+        "source": {
+            "type": "git",
+            "url": "https://github.com/opis/json-schema.git",
+            "reference": "19868514d5e4c27553b21c7f0cf6388734c67d18"
+        },
+        "dist": {
+            "type": "zip",
+            "url": "https://api.github.com/repos/opis/json-schema/zipball/19868514d5e4c27553b21c7f0cf6388734c67d18",
+            "reference": "19868514d5e4c27553b21c7f0cf6388734c67d18",
+            "shasum": ""
+        },
+        "require": {
+            "php": ">=7.0"
+        },
+        "require-dev": {
+            "ext-bcmath": "*",
+            "ext-intl": "*",
+            "ext-json": "*",
+            "ext-mbstring": "*",
+            "opis/string": "^1.4",
+            "phpunit/phpunit": "^6.5"
+        },
+        "suggest": {
+            "opis/string": "A standalone library for manipulating multibyte strings"
+        },
+        "time": "2019-05-22T05:16:45+00:00",
+        "type": "library",
+        "extra": {
+            "branch-alias": {
+                "dev-master": "1.0.x-dev"
+            }
+        },
+        "installation-source": "dist",
+        "autoload": {
+            "psr-4": {
+                "Opis\\JsonSchema\\": "src/"
+            }
+        },
+        "notification-url": "https://packagist.org/downloads/",
+        "license": [
+            "Apache-2.0"
+        ],
+        "authors": [
+            {
+                "name": "Marius Sarca",
+                "email": "marius.sarca@gmail.com"
+            },
+            {
+                "name": "Sorin Sarca",
+                "email": "sarca_sorin@hotmail.com"
+            }
+        ],
+        "description": "Json Schema Validator",
+        "homepage": "http://www.opis.io/json-schema",
+        "keywords": [
+            "json",
+            "schema",
+            "validation",
+            "validator"
+        ]
+    },
+    {
+        "name": "symfony/css-selector",
+        "version": "v5.1.0",
+        "version_normalized": "5.1.0.0",
+        "source": {
+            "type": "git",
+            "url": "https://github.com/symfony/css-selector.git",
+            "reference": "e544e24472d4c97b2d11ade7caacd446727c6bf9"
+        },
+        "dist": {
+            "type": "zip",
+            "url": "https://api.github.com/repos/symfony/css-selector/zipball/e544e24472d4c97b2d11ade7caacd446727c6bf9",
+            "reference": "e544e24472d4c97b2d11ade7caacd446727c6bf9",
+            "shasum": ""
+        },
+        "require": {
+            "php": ">=7.2.5"
+        },
+        "time": "2020-05-20T17:43:50+00:00",
+        "type": "library",
+        "extra": {
+            "branch-alias": {
+                "dev-master": "5.1-dev"
+            }
+        },
+        "installation-source": "dist",
+        "autoload": {
+            "psr-4": {
+                "Symfony\\Component\\CssSelector\\": ""
+            },
+            "exclude-from-classmap": [
+                "/Tests/"
+            ]
+        },
+        "notification-url": "https://packagist.org/downloads/",
+        "license": [
+            "MIT"
+        ],
+        "authors": [
+            {
+                "name": "Fabien Potencier",
+                "email": "fabien@symfony.com"
+            },
+            {
+                "name": "Jean-François Simon",
+                "email": "jeanfrancois.simon@sensiolabs.com"
+            },
+            {
+                "name": "Symfony Community",
+                "homepage": "https://symfony.com/contributors"
+            }
+        ],
+        "description": "Symfony CssSelector Component",
+        "homepage": "https://symfony.com",
+        "funding": [
+            {
+                "url": "https://symfony.com/sponsor",
+                "type": "custom"
+            },
+            {
+                "url": "https://github.com/fabpot",
+                "type": "github"
+            },
+            {
+                "url": "https://tidelift.com/funding/github/packagist/symfony/symfony",
+                "type": "tidelift"
+            }
+        ]
+    },
+    {
+        "name": "voku/simple_html_dom",
+        "version": "4.7.17",
+        "version_normalized": "4.7.17.0",
+        "source": {
+            "type": "git",
+            "url": "https://github.com/voku/simple_html_dom.git",
+            "reference": "804aca422f1fe0104b1320ca09fd06cd0062782c"
+        },
+        "dist": {
+            "type": "zip",
+            "url": "https://api.github.com/repos/voku/simple_html_dom/zipball/804aca422f1fe0104b1320ca09fd06cd0062782c",
+            "reference": "804aca422f1fe0104b1320ca09fd06cd0062782c",
+            "shasum": ""
+        },
+        "require": {
+            "ext-dom": "*",
+            "ext-libxml": "*",
+            "ext-simplexml": "*",
+            "php": ">=7.0.0",
+            "symfony/css-selector": "~3.0 || ~4.0 || ~5.0"
+        },
+        "require-dev": {
+            "phpunit/phpunit": "~6.0 || ~7.0"
+        },
+        "suggest": {
+            "voku/portable-utf8": "If you need e.g. UTF-8 fixed output."
+        },
+        "time": "2020-04-09T21:20:43+00:00",
+        "type": "library",
+        "installation-source": "dist",
+        "autoload": {
+            "psr-4": {
+                "voku\\helper\\": "src/voku/helper/"
+            }
+        },
+        "notification-url": "https://packagist.org/downloads/",
+        "license": [
+            "MIT"
+        ],
+        "authors": [
+            {
+                "name": "dimabdc",
+                "email": "support@titor.ru",
+                "homepage": "http://github.com/dimabdc",
+                "role": "Developer"
+            },
+            {
+                "name": "Lars Moelleken",
+                "homepage": "http://www.moelleken.org/",
+                "role": "Developer"
+            }
+        ],
+        "description": "Simple HTML DOM package.",
+        "homepage": "http://simplehtmldom.sourceforge.net/",
+        "keywords": [
+            "HTML Parser",
+            "dom",
+            "php dom"
+        ],
+        "funding": [
+            {
+                "url": "https://www.paypal.me/moelleken",
+                "type": "custom"
+            },
+            {
+                "url": "https://github.com/voku",
+                "type": "github"
+            },
+            {
+                "url": "https://www.patreon.com/voku",
+                "type": "patreon"
+            },
+            {
+                "url": "https://tidelift.com/funding/github/packagist/voku/simple_html_dom",
+                "type": "tidelift"
+            }
+        ]
+    }
+]
