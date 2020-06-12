@@ -2,7 +2,6 @@
  * WordPress dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { serialize } from '@wordpress/blocks';
 import { useEffect, useContext, createContext, useRef } from '@wordpress/element';
 import { useRegistry, useDispatch, useSelect } from '@wordpress/data';
 import { addFilter } from '@wordpress/hooks';
@@ -16,6 +15,8 @@ import registerStore from './store';
 const CoreBlockContext = createContext( null );
 
 const Plugin = () => {
+	// importing getBlockTypes directly from `@wordpress/blocks` somehow breaks translations
+	const { serialize } = window.wp.blocks;
 	const { createErrorNotice } = useDispatch( 'core/notices' );
 
 	const blocksById = useSelect( ( select ) => select( `wp-graphql-gutenberg/block-editor-preview` ).getBlocksById() );

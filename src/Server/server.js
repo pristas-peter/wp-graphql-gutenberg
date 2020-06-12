@@ -1,6 +1,5 @@
 import { unmountComponentAtNode } from '@wordpress/element';
 import { applyFilters } from '@wordpress/hooks';
-import { getBlockTypes } from '@wordpress/blocks';
 
 export const IS_SERVER_PARAM = 'wpGraphqlGutenbergServer';
 
@@ -32,6 +31,9 @@ export const closeEditor = () => {
 
 // get block type registry
 export const getBlockRegistry = () => {
+	// importing getBlockTypes directly from `@wordpress/blocks` somehow breaks translations
+	const { getBlockTypes } = window.wp.blocks;
+
 	return JSON.parse(
 		JSON.stringify(
 			getBlockTypes().map( ( { icon, transforms, ...rest } ) => rest ) // eslint-disable-line no-unused-vars
