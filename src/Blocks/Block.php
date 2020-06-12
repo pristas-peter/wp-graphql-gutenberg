@@ -55,7 +55,27 @@ class Block implements ArrayAccess {
 					$source_node = $value['selector'] ? $node->findOne($value['selector']) : $node;
 
 					if ($source_node) {
-						$result[$key] = $source_node->innerhtml;
+						if (!empty($value['multiline'])) {
+							$tag = $value['multiline'];
+
+							$value = '';
+
+							foreach ($source_node->childNodes as $childNode) {
+
+								$childNode = new \voku\helper\SimpleHtmlDom($childNode);
+
+								if (strtolower($childNode->tag) !== $tag) {
+									continue;
+								}
+
+								$value = $value . $childNode->outerhtml;
+							}
+							
+							$result[$key] = $value;
+						} else {
+							$result[$key] = $source_node->innerhtml;
+						}
+
 					}
 
 					break;
