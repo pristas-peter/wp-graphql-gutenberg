@@ -14,7 +14,12 @@ class Block implements ArrayAccess {
 
 		foreach ($blocks as $block) {
 			if (empty($block['blockName'])) {
-				continue;
+
+				if (json_encode($block['innerHTML']) === '"\n\n"') {
+					continue;
+				}
+
+				$block['blockName'] = 'core/freeform';
 			}
 
 			$result[] = new Block($block, $post_id, $registry, $order, $parent);
@@ -52,7 +57,7 @@ class Block implements ArrayAccess {
 
 			switch ($source) {
 				case 'html':
-					$source_node = $value['selector'] ? $node->findOne($value['selector']) : $node;
+					$source_node = !empty($value['selector']) ? $node->findOne($value['selector']) : $node;
 
 					if ($source_node) {
 						if (!empty($value['multiline'])) {
