@@ -14,7 +14,12 @@ class Block implements ArrayAccess {
 
 		foreach ($blocks as $block) {
 			if (empty($block['blockName'])) {
-				continue;
+
+				if (json_encode($block['innerHTML']) === '"\n\n"') {
+					continue;
+				}
+
+				$block['blockName'] = 'core/freeform';
 			}
 
 			$result[] = new Block($block, $post_id, $registry, $order, $parent);
