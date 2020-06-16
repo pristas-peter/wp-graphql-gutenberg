@@ -57,7 +57,7 @@ class Block implements ArrayAccess {
 
 			switch ($source) {
 				case 'html':
-					$source_node = $value['selector'] ? $node->findOne($value['selector']) : $node;
+					$source_node = !empty($value['selector']) ? $node->findOne($value['selector']) : $node;
 
 					if ($source_node) {
 						if (!empty($value['multiline'])) {
