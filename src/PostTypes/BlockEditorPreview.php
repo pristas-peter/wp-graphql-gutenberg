@@ -47,7 +47,7 @@ class BlockEditorPreview {
 				]
 			],
 			'post_type' => WP_GRAPHQL_GUTENBERG_PREVIEW_POST_TYPE_NAME,
-			'post_status' => 'any',
+			'post_status' => 'auto-draft',
 			'fields' => 'ids'
 		]);
 
@@ -61,11 +61,20 @@ class BlockEditorPreview {
 	}
 
 	public static function insert_preview($post_id, $preview_post_id, $post_content) {
+		$post_title = $post_id;
+		$post_name = $post_id;
+
+		if ($post_id !== $preview_post_id) {
+			$post_title = $post_id . ' (' . $preview_post_id . ')';
+			$post_name = $post_id . '-' . $preview_post_id;
+		}
+
 		$insert_options = [
-			'post_title' => $post_id,
+			'post_title' => $post_title,
+			'post_name' => $post_name,
 			'post_content' => $post_content,
 			'post_type' => WP_GRAPHQL_GUTENBERG_PREVIEW_POST_TYPE_NAME,
-			'post_status' => 'private',
+			'post_status' => 'auto-draft',
 			'meta_input' => [
 				'post_id' => $post_id,
 				'preview_post_id' => $preview_post_id
@@ -152,7 +161,7 @@ class BlockEditorPreview {
 							get_post_type_object(WP_GRAPHQL_GUTENBERG_PREVIEW_POST_TYPE_NAME)->cap->edit_posts
 						)
 					) {
-						$query_args['post_status'] = 'private';
+						$query_args['post_status'] = 'auto-draft';
 					} else {
 						$query_args['post_status'] = 'publish';
 					}
