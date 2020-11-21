@@ -102,13 +102,33 @@ class BlockTypes {
 				$fields[$name] = [
 					'type' => $type,
 					'resolve' => function ($attributes, $args, $context, $info) use ($name, $default_value) {
-						return $attributes[$name] ?? $default_value;
+						$value = $attributes[$name] ?? $default_value;
+						return self::normalize_attribute_value($value, $attributes['__type'][$name]['type']);
 					}
 				];
 			}
 		}
 
 		return $fields;
+	}
+
+	protected static function normalize_attribute_value($value, $type) {
+		switch ($type) {
+			case 'string':
+				return strval($value);
+				break;
+			case 'number':
+				return floatval($value);
+				break;
+			case 'boolean':
+				return boolval($value);
+				break;
+			case 'integer':
+				return intval($value);
+				break;
+			default:
+				return $value;
+		}
 	}
 
 	protected static function register_attributes_types($block_type, $prefix) {
