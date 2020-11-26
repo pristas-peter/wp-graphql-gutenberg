@@ -99,7 +99,7 @@ class BlockTypes {
 			if (isset($type)) {
 				$default_value = $attribute['default'] ?? null;
 
-				$fields[$name] = [
+				$fields[self::normalize_attribute_name($name)] = [
 					'type' => $type,
 					'resolve' => function ($attributes, $args, $context, $info) use ($name, $default_value) {
 						$value = $attributes[$name] ?? $default_value;
@@ -110,6 +110,10 @@ class BlockTypes {
 		}
 
 		return $fields;
+	}
+
+	protected static function normalize_attribute_name($name) {
+		return lcfirst(str_replace(' ', '', ucwords(str_replace(['-', '_'], ' ', $name))));
 	}
 
 	protected static function normalize_attribute_value($value, $type) {
