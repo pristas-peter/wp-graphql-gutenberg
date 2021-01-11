@@ -269,10 +269,10 @@ class BlockTypes {
 					$types = [$type_registry->get_type('Block')];
 
 					foreach ($type_names as $type_name) {
-						$types[] = $config['typeLoader']($type_name);
+						$types[] = $config->getTypeLoader()($type_name);
 					}
 
-					$config['types'] = array_merge($config['types'] ?? [], $types);
+					$config->types = array_merge($config->types ?? [], $types);
 					return $config;
 				},
 				10
