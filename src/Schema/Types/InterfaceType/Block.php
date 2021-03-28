@@ -81,6 +81,13 @@ class Block {
 					],
 					'order' => [
 						'type' => ['non_null' => 'Int']
+					],
+					'attributesJSON' => [
+						'type' => 'String',
+						'description' => __('Block attributes, JSON encoded', 'wp-graphql-gutenberg'),
+						'resolve' => function ($block, $args, $context, $info) {
+							return json_encode($block->attributes);
+						}
 					]
 				],
 				'resolveType' => function ($block) use ($type_registry) {
