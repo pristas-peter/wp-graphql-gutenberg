@@ -122,8 +122,14 @@ class Block implements ArrayAccess {
 	}
 
 	protected static function parse_attributes($data, $block_type) {
-		$types = [$block_type['attributes']];
 		$attributes = $data['attrs'];
+		if ($block_type === null) {
+			return [
+				'attributes' => $attributes
+			];
+		}
+
+		$types = [$block_type['attributes']];
 
 		foreach ($block_type['deprecated'] ?? [] as $deprecated) {
 			if (!empty($deprecated['attributes'])) {
