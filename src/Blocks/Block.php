@@ -75,7 +75,7 @@ class Block implements ArrayAccess {
 
 								$value = $value . $childNode->outerhtml;
 							}
-							
+
 							$result[$key] = $value;
 						} else {
 							$result[$key] = $source_node->innerhtml;
@@ -167,8 +167,8 @@ class Block implements ArrayAccess {
 		$this->name = $data['blockName'];
 		$this->postId = $post_id;
 		$this->blockType = $registry[$this->name];
-		$this->originalContent = self::strip_newlines($data['innerHTML']);
-		$this->saveContent = self::parse_inner_content($data);
+		$this->originalContent = apply_filters('the_content', self::strip_newlines($data['innerHTML']));
+		$this->saveContent = apply_filters('the_content', self::parse_inner_content($data));
 		$this->order = $order;
 		$this->get_parent = function () use (&$parent) {
 			return $parent;
