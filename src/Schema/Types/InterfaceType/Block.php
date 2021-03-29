@@ -67,17 +67,7 @@ class Block {
 					],
 					'dynamicContent' => [
 						'type' => 'String',
-						'description' => __('Server side rendered content.', 'wp-graphql-gutenberg'),
-						'resolve' => function ($block, $args, $context, $info) {
-							$registry = \WP_Block_Type_Registry::get_instance();
-							$server_block_type = $registry->get_registered($block->name);
-
-							if (empty($server_block_type)) {
-								return null;
-							}
-
-							return $server_block_type->render($block->attributes);
-						}
+						'description' => __('Server side rendered content.', 'wp-graphql-gutenberg')
 					],
 					'order' => [
 						'type' => ['non_null' => 'Int']
