@@ -116,6 +116,8 @@ class Block implements ArrayAccess {
 			if (empty($result[$key]) && isset($value['default'])) {
 				$result[$key] = $value['default'];
 			}
+			
+			$result[$key] = apply_filters('the_content', $result[$key]);
 		}
 
 		return $result;
