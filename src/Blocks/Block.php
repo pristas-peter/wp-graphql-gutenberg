@@ -147,10 +147,16 @@ class Block implements ArrayAccess {
 			$result = $validator->schemaValidation((object) $attributes, $schema);
 
 			if ($result->isValid()) {
+				$filtered_attributes = [];
+				
+				foreach ($attributes as $key => $value) {
+				  $filtered_attributes[$key] = apply_filters('the_content', $value);
+				}
+				
 				return [
 					'attributes' => array_merge(
 						self::source_attributes(HtmlDomParser::str_get_html($data['innerHTML']), $type),
-						$attributes
+						$filtered_attributes
 					),
 					'type' => $type
 				];
