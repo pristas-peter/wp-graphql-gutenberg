@@ -32,4 +32,13 @@ class Utils
 			})
 		);
 	}
+
+	public static function apply_content_filters($content)
+	{
+		if (class_exists('Amazon_S3_And_CloudFront_Pro') || class_exists('Amazon_S3_And_CloudFront')) {
+			$content = apply_filters('as3cf_filter_post_local_to_provider', $content);
+		}
+
+		return $content;
+	}
 }

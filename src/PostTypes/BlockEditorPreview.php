@@ -7,6 +7,7 @@ use WP_REST_Request;
 use WPGraphQL\Utils\Utils;
 use WPGraphQLGutenberg\Blocks\Block;
 use WPGraphQLGutenberg\Blocks\Registry;
+use WPGraphQLGutenberg\Blocks\Utils as BlockUtils;
 use WPGraphQLGutenberg\Schema\Utils as SchemaUtils;
 
 if (!defined('WP_GRAPHQL_GUTENBERG_PREVIEW_POST_TYPE_NAME')) {
@@ -247,7 +248,7 @@ class BlockEditorPreview {
 				'type' => ['list_of' => ['non_null' => 'Block']],
 				'resolve' => function ($model) {
 					return Block::create_blocks(
-						parse_blocks(get_post($model->ID)->post_content),
+						parse_blocks(BlockUtils::apply_content_filters(get_post($model->ID)->post_content)),
 						$model->ID,
 						Registry::get_registry()
 					);
@@ -273,7 +274,7 @@ class BlockEditorPreview {
 				'resolve' => function ($model) {
 					return json_encode(
 						Block::create_blocks(
-							parse_blocks(get_post($model->ID)->post_content),
+							parse_blocks(BlockUtils::apply_content_filters(get_post($model->ID)->post_content)),
 							$model->ID,
 							Registry::get_registry()
 						)
