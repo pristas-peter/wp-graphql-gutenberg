@@ -148,7 +148,13 @@ class Block implements ArrayAccess {
 
 			$validator = new Validator();
 
-			$result = $validator->schemaValidation((object) $attributes, $schema);
+			if (empty($data['innerHTML'])) {
+				$data['innerHTML'] = '<span data-warning="This block does not contain a render template"></span>';
+			}
+
+			$obj_attrs = json_decode(json_encode($attributes, JSON_FORCE_OBJECT));
+
+			$result = $validator->schemaValidation($obj_attrs, $schema);
 
 			if ($result->isValid()) {
 				return [
