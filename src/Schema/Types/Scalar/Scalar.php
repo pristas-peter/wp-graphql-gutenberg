@@ -4,7 +4,7 @@ namespace WPGraphQLGutenberg\Schema\Types\Scalar;
 
 class Scalar {
 	public function __construct() {
-		add_action('graphql_register_types_late', function ($type_registry) {
+		add_action('graphql_register_types', function ($type_registry) {
 			register_graphql_scalar('BlockAttributesObject', [
 				'serialize' => function ($value) {
 					return json_encode($value);
