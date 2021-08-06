@@ -272,29 +272,7 @@ class BlockTypes {
 					return self::format_block_name($block->name);
 				}
 			]);
-
-			add_filter(
-				'graphql_schema_config',
-				function ($config) use ($type_names, &$type_registry) {
-					$types = [$type_registry->get_type('Block')];
-
-					foreach ($type_names as $type_name) {
-						if ( is_array( $config ) ) {
-							$types[] = $config['typeLoader']($type_name);
-						} else {
-							$types[] = $config->getTypeLoader()($type_name);
-						}
-					}
-
-					if ( is_array( $config ) ) {
-						$config['types'] = array_merge($config['types'] ?? [], $types);
-					} else {
-						$config->types = array_merge($config->types ?? [], $types);
-					}
-					return $config;
-				},
-				10
-			);
+			
 		});
 	}
 }
