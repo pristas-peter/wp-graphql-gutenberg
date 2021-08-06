@@ -195,7 +195,7 @@ class BlockTypes {
 
 			register_graphql_union_type($type, [
 				'typeNames' => $types,
-				'resolveType' => function ($attributes) use ($types_by_definition, $type_registry, $types) {
+				'resolveType' => function ($attributes) use ($types_by_definition) {
 
 					return $types_by_definition[json_encode($attributes['__type'])];
 
@@ -272,7 +272,7 @@ class BlockTypes {
 					return self::format_block_name($block->name);
 				}
 			]);
-			
+
 		});
 	}
 }
