@@ -16,7 +16,9 @@ export const checkIframeAdmin = () => {
 						onComplete();
 						break;
 					case actions.GET_BLOCK_REGISTRY:
-						onComplete( getBlockRegistry() );
+						window.addEventListener('load', function() {
+							onComplete( getBlockRegistry() );
+						});
 						break;
 					default:
 						onError( new Error( __( 'Invalid action', 'wp-graphql-gutenberg' ) ) );
