@@ -151,24 +151,26 @@ class Block implements ArrayAccess {
 			$result = $validator->schemaValidation((object) $attributes, $schema);
 
 			if ($result->isValid()) {
-				 $returnable_attributes = [
-						'attributes' => array_merge(
-								self::source_attributes(HtmlDomParser::str_get_html($data['innerHTML']), $type),
-								$attributes
-						),
-						'type' => $type,
-					];
+				$returnable_attributes = [
+					'attributes' => array_merge(
+							self::source_attributes(HtmlDomParser::str_get_html($data['innerHTML']), $type),
+							$attributes
+					),
+					'type' => $type,
+				];
 
-					$filtered_attributes = [];
-					if (has_filter('graphql_gutenberg_block_attribute_value')) {
-						foreach ($returnable_attributes['attributes'] as $key => $value) {
-								$filtered_attributes[$key] = apply_filters('graphql_gutenberg_block_attribute_value', $value);
-						}
-						$returnable_attributes['attributes'] = $filtered_attributes;
+				$filtered_attributes = [];
+
+				if (has_filter('graphql_gutenberg_block_attribute_value')) {
+					foreach ($returnable_attributes['attributes'] as $key => $value) {
+							$filtered_attributes[$key] = apply_filters('graphql_gutenberg_block_attribute_value', $value);
 					}
-					return $returnable_attributes;
+					$returnable_attributes['attributes'] = $filtered_attributes;
 				}
+
+				return $returnable_attributes;
 			}
+		}
 
 		return [
 			'attributes' => $attributes,
