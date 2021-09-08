@@ -152,7 +152,7 @@ class Block implements ArrayAccess {
 
 			if ($result->isValid()) {
 				 $returnable_attributes = [
-					'attributes' => array_merge(
+						'attributes' => array_merge(
 								self::source_attributes(HtmlDomParser::str_get_html($data['innerHTML']), $type),
 								$attributes
 						),
