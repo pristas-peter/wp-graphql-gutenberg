@@ -148,7 +148,7 @@ class Block implements ArrayAccess {
 
 			$validator = new Validator();
 
-			$result = $validator->schemaValidation((object) $attributes, $schema);
+			$result = $validator->schemaValidation(json_decode(json_encode($attributes)), $schema);
 
 			if ($result->isValid()) {
 				return [
