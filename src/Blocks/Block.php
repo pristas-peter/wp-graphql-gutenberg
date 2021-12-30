@@ -123,6 +123,15 @@ class Block implements ArrayAccess {
 
 	protected static function parse_attributes($data, $block_type) {
 		$attributes = $data['attrs'];
+
+		/**
+		 * Filters the block attributes.
+		 *
+		 * @param array $attributes Block attributes.
+		 * @param array $block      Block object.
+		 */
+		$attributes = apply_filters('graphql_gutenberg_block_attributes_fields', $attributes, $block_type);
+
 		if ($block_type === null) {
 			return [
 				'attributes' => $attributes
