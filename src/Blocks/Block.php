@@ -128,9 +128,9 @@ class Block implements ArrayAccess {
 		 * Filters the block attributes.
 		 *
 		 * @param array $attributes Block attributes.
-		 * @param array $block      Block object.
+		 * @param array $block_type Block type definition.
 		 */
-		$attributes = apply_filters('graphql_gutenberg_block_attributes_fields', $attributes, $block_type);
+		$attributes = apply_filters('graphql_gutenberg_block_attributes', $attributes, $block_type);
 
 		if ($block_type === null) {
 			return [
