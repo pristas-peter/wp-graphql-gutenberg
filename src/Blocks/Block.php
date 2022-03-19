@@ -194,19 +194,19 @@ class Block implements ArrayAccess {
 		$this->attributes = $result['attributes'];
 		$this->attributesType = $result['type'];
 
-		$this->dynamicContent = $this->render_dynamic_content();
+		$this->dynamicContent = $this->render_dynamic_content($data);
 
 	}
 
-	private function render_dynamic_content() {
+	private function render_dynamic_content($data) {
 		$registry = \WP_Block_Type_Registry::get_instance();
 		$server_block_type = $registry->get_registered($this->name);
 
-		if (empty($server_block_type)) {
+		if (empty($server_block_type) || !$server_block_type->is_dynamic()) {
 			return null;
 		}
 
-		return $server_block_type->render($this->attributes);
+		return render_block($data);
 	}
 
 	public function offsetExists($offset) {
