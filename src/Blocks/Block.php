@@ -157,12 +157,18 @@ class Block implements ArrayAccess {
 
 			$validator = new Validator();
 
-			$result = $validator->schemaValidation(json_decode(json_encode($attributes)), $schema);
+			// Convert $attributes to an object, handle both nested and empty objects.
+			$attrs = empty($attributes)
+				? (object)$attributes
+				: json_decode(json_encode($attributes), false);
+			$result = $validator->schemaValidation($attrs, $schema);
 
 			if ($result->isValid()) {
+				// Avoid empty HTML, which can trigger an error on PHP 8.
+				$html = empty($data['innerHTML']) ? '<!-- -->' : $data['innerHTML'];
 				return [
 					'attributes' => array_merge(
-						self::source_attributes(HtmlDomParser::str_get_html($data['innerHTML']), $type),
+						self::source_attributes(HtmlDomParser::str_get_html($html), $type),
 						$attributes
 					),
 					'type' => $type
