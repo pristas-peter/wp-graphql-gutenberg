@@ -73,6 +73,18 @@ class BlockTypes {
 					$type = Scalar::BlockAttributesObject();
 					break;
 			}
+
+			if (is_array($attribute['type'])) {
+				$types = $attribute['type'];
+
+				if(count($types) > 1) {
+					$type = array_map('ucfirst', $types);
+					$type = implode(' | ', $type);
+				} else {
+					$type = reset($types);
+					$type = ucfirst($type);
+				}
+			}
 		} elseif (isset($attribute['source'])) {
 			$type = 'String';
 		}
