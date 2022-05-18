@@ -9,6 +9,7 @@ class Schema {
 		new \WPGraphQLGutenberg\Schema\Types\InterfaceType\Block();
 		new \WPGraphQLGutenberg\Schema\Types\InterfaceType\BlockEditorContentNode();
 		new \WPGraphQLGutenberg\Schema\Types\Connection\BlockEditorContentNodeConnection();
+		new \WPGraphQLGutenberg\Schema\Types\Connection\Blocks\CoreImageBlockToMediaItemConnection();
 		new \WPGraphQLGutenberg\Schema\Types\BlockTypes();
 	}
 }
