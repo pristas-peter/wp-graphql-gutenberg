@@ -161,13 +161,20 @@ class BlockTypes {
 		foreach ($definitions as $index => $definition) {
 			$type = self::format_attributes($index === 0 ? $prefix : $prefix . 'DeprecatedV' . $index);
 
-			register_graphql_object_type($type, [
-				'fields' => apply_filters(
-					'graphql_gutenberg_block_attributes_fields',
-					self::create_attributes_fields($block_type['attributes'], $type),
-					$definition,
-					$block_type
-				)
+			$fields = apply_filters(
+				'graphql_gutenberg_block_attributes_fields',
+				self::create_attributes_fields($block_type['attributes'], $type),
+				$definition,
+				$block_type
+			);
+
+			if ( ! is_array( $fields ) || empty( $fields ) ) {
+				continue;
+			}
+
+			register_graphql_object_type( $type, [
+				'fields' => $fields,
+				'eagerlyLoadType' => true,
 			]);
 
 			$types[] = $type;
@@ -189,8 +196,10 @@ class BlockTypes {
 			register_graphql_union_type($type, [
 				'typeNames' => $types,
 				'resolveType' => function ($attributes) use ($types_by_definition) {
+
 					return $types_by_definition[json_encode($attributes['__type'])];
-				}
+
+				},
 			]);
 
 			return $type;
@@ -226,7 +235,8 @@ class BlockTypes {
 		register_graphql_object_type($name, [
 			'fields' => $fields,
 			'description' => $block_type['name'] . ' block',
-			'interfaces' => ['Block']
+			'interfaces' => ['Block'],
+			'eagerlyLoadType' => true,
 		]);
 
 		return $name;
@@ -263,28 +273,6 @@ class BlockTypes {
 				}
 			]);
 
-			add_filter(
-				'graphql_schema_config',
-				function ($config) use ($type_names, &$type_registry) {
-					$types = [$type_registry->get_type('Block')];
-
-					foreach ($type_names as $type_name) {
-						if ( is_array( $config ) ) {
-							$types[] = $config['typeLoader']($type_name);
-						} else {
-							$types[] = $config->getTypeLoader()($type_name);
-						}
-					}
-
-					if ( is_array( $config ) ) {
-						$config['types'] = array_merge($config['types'] ?? [], $types);
-					} else {
-						$config->types = array_merge($config->types ?? [], $types);
-					}
-					return $config;
-				},
-				10
-			);
 		});
 	}
 }

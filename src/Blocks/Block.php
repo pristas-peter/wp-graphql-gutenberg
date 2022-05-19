@@ -122,8 +122,23 @@ class Block implements ArrayAccess {
 	}
 
 	protected static function parse_attributes($data, $block_type) {
-		$types = [$block_type['attributes']];
 		$attributes = $data['attrs'];
+
+		/**
+		 * Filters the block attributes.
+		 *
+		 * @param array $attributes Block attributes.
+		 * @param array $block_type Block type definition.
+		 */
+		$attributes = apply_filters('graphql_gutenberg_block_attributes', $attributes, $block_type);
+
+		if ($block_type === null) {
+			return [
+				'attributes' => $attributes
+			];
+		}
+
+		$types = [$block_type['attributes']];
 
 		foreach ($block_type['deprecated'] ?? [] as $deprecated) {
 			if (!empty($deprecated['attributes'])) {
@@ -142,12 +157,18 @@ class Block implements ArrayAccess {
 
 			$validator = new Validator();
 
-			$result = $validator->schemaValidation((object) $attributes, $schema);
+			// Convert $attributes to an object, handle both nested and empty objects.
+			$attrs = empty($attributes)
+				? (object)$attributes
+				: json_decode(json_encode($attributes), false);
+			$result = $validator->schemaValidation($attrs, $schema);
 
 			if ($result->isValid()) {
+				// Avoid empty HTML, which can trigger an error on PHP 8.
+				$html = empty($data['innerHTML']) ? '<!-- -->' : $data['innerHTML'];
 				return [
 					'attributes' => array_merge(
-						self::source_attributes(HtmlDomParser::str_get_html($data['innerHTML']), $type),
+						self::source_attributes(HtmlDomParser::str_get_html($html), $type),
 						$attributes
 					),
 					'type' => $type
@@ -162,7 +183,19 @@ class Block implements ArrayAccess {
 	}
 
 	public function __construct($data, $post_id, $registry, $order, $parent) {
-		$this->innerBlocks = self::create_blocks($data['innerBlocks'], $post_id, $registry, $this);
+
+		$inner_blocks = $data['innerBlocks'];
+
+		// Handle reusable blocks.
+		if ('core/block' === $data['blockName'] && isset($data['attrs']['ref'])) {
+			$reusable_post = get_post(absint($data['attrs']['ref']));
+
+			if (!empty($reusable_post)) {
+				$inner_blocks = parse_blocks($reusable_post->post_content);
+			}
+		}
+
+		$this->innerBlocks = self::create_blocks($inner_blocks, $post_id, $registry, $this);
 
 		$this->name = $data['blockName'];
 		$this->postId = $post_id;
@@ -178,6 +211,20 @@ class Block implements ArrayAccess {
 
 		$this->attributes = $result['attributes'];
 		$this->attributesType = $result['type'];
+
+		$this->dynamicContent = $this->render_dynamic_content($data);
+
+	}
+
+	private function render_dynamic_content($data) {
+		$registry = \WP_Block_Type_Registry::get_instance();
+		$server_block_type = $registry->get_registered($this->name);
+
+		if (empty($server_block_type) || !$server_block_type->is_dynamic()) {
+			return null;
+		}
+
+		return render_block($data);
 	}
 
 	public function offsetExists($offset) {

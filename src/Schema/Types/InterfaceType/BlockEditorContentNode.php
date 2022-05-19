@@ -13,6 +13,9 @@ class BlockEditorContentNode {
 
 	function __construct() {
 		$fields = [
+			'id' => [
+			   'type' => ['non_null' => 'ID']			   
+			],
 			'blocks' => [
 				'type' => [
 					'list_of' => ['non_null' => 'Block']
