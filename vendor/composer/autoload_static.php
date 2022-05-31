@@ -45,6 +45,7 @@ class ComposerStaticInit1ae93f46350550e5030837be01a3fdf8
     );
 
     public static $classMap = array (
+        'Composer\\InstalledVersions' => __DIR__ . '/..' . '/composer/InstalledVersions.php',
         'Opis\\JsonSchema\\Exception\\AbstractSchemaException' => __DIR__ . '/..' . '/opis/json-schema/src/Exception/AbstractSchemaException.php',
         'Opis\\JsonSchema\\Exception\\DuplicateSchemaException' => __DIR__ . '/..' . '/opis/json-schema/src/Exception/DuplicateSchemaException.php',
         'Opis\\JsonSchema\\Exception\\FilterNotFoundException' => __DIR__ . '/..' . '/opis/json-schema/src/Exception/FilterNotFoundException.php',
@@ -158,6 +159,7 @@ class ComposerStaticInit1ae93f46350550e5030837be01a3fdf8
         'WPGraphQLGutenberg\\Schema\\Schema' => __DIR__ . '/../..' . '/src/Schema/Schema.php',
         'WPGraphQLGutenberg\\Schema\\Types\\BlockTypes' => __DIR__ . '/../..' . '/src/Schema/Types/BlockTypes.php',
         'WPGraphQLGutenberg\\Schema\\Types\\Connection\\BlockEditorContentNodeConnection' => __DIR__ . '/../..' . '/src/Schema/Types/Connection/BlockEditorContentNodeConnection.php',
+        'WPGraphQLGutenberg\\Schema\\Types\\Connection\\Blocks\\CoreImageBlockToMediaItemConnection' => __DIR__ . '/../..' . '/src/Schema/Types/Connection/Blocks/CoreImageBlockToMediaItemConnection.php',
         'WPGraphQLGutenberg\\Schema\\Types\\InterfaceType\\Block' => __DIR__ . '/../..' . '/src/Schema/Types/InterfaceType/Block.php',
         'WPGraphQLGutenberg\\Schema\\Types\\InterfaceType\\BlockEditorContentNode' => __DIR__ . '/../..' . '/src/Schema/Types/InterfaceType/BlockEditorContentNode.php',
         'WPGraphQLGutenberg\\Schema\\Types\\Object\\ReusableBlock' => __DIR__ . '/../..' . '/src/Schema/Types/Object/ReusableBlock.php',
