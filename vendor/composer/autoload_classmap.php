@@ -6,6 +6,7 @@ $vendorDir = dirname(dirname(__FILE__));
 $baseDir = dirname($vendorDir);
 
 return array(
+    'Composer\\InstalledVersions' => $vendorDir . '/composer/InstalledVersions.php',
     'Opis\\JsonSchema\\Exception\\AbstractSchemaException' => $vendorDir . '/opis/json-schema/src/Exception/AbstractSchemaException.php',
     'Opis\\JsonSchema\\Exception\\DuplicateSchemaException' => $vendorDir . '/opis/json-schema/src/Exception/DuplicateSchemaException.php',
     'Opis\\JsonSchema\\Exception\\FilterNotFoundException' => $vendorDir . '/opis/json-schema/src/Exception/FilterNotFoundException.php',
@@ -119,6 +120,7 @@ return array(
     'WPGraphQLGutenberg\\Schema\\Schema' => $baseDir . '/src/Schema/Schema.php',
     'WPGraphQLGutenberg\\Schema\\Types\\BlockTypes' => $baseDir . '/src/Schema/Types/BlockTypes.php',
     'WPGraphQLGutenberg\\Schema\\Types\\Connection\\BlockEditorContentNodeConnection' => $baseDir . '/src/Schema/Types/Connection/BlockEditorContentNodeConnection.php',
+    'WPGraphQLGutenberg\\Schema\\Types\\Connection\\Blocks\\CoreImageBlockToMediaItemConnection' => $baseDir . '/src/Schema/Types/Connection/Blocks/CoreImageBlockToMediaItemConnection.php',
     'WPGraphQLGutenberg\\Schema\\Types\\InterfaceType\\Block' => $baseDir . '/src/Schema/Types/InterfaceType/Block.php',
     'WPGraphQLGutenberg\\Schema\\Types\\InterfaceType\\BlockEditorContentNode' => $baseDir . '/src/Schema/Types/InterfaceType/BlockEditorContentNode.php',
     'WPGraphQLGutenberg\\Schema\\Types\\Object\\ReusableBlock' => $baseDir . '/src/Schema/Types/Object/ReusableBlock.php',
