@@ -11,13 +11,19 @@
 		]
 	},
 	"config": {
-		"optimize-autoloader": true
+		"optimize-autoloader": true,
+		"platform": {
+		  "php": "7.3"
+		},
+		"process-timeout": 0,
+		"allow-plugins": {
+		  "dealerdirect/phpcodesniffer-composer-installer": true,
+		  "phpstan/extension-installer": true
+		}
 	},
 	"require-dev": {
-		"dealerdirect/phpcodesniffer-composer-installer": "0.5.0",
-		"wp-coding-standards/wpcs": "2.1.1",
-		"phpcompatibility/phpcompatibility-wp": "2.1.0",
-		"squizlabs/php_codesniffer": "3.5.4"
+	  "automattic/vipwpcs": "^2.2",
+	  "phpcompatibility/phpcompatibility-wp": "^2.1"
 	},
 	"scripts": {
 		"phpcs-i": [

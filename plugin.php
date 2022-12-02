@@ -16,15 +16,15 @@ namespace WPGraphQLGutenberg;
 
 use WPGraphQLGutenberg\Blocks\Registry;
 
-if (!defined('ABSPATH')) {
-	die('Silence is golden.');
+if ( ! defined( 'ABSPATH' ) ) {
+	die( 'Silence is golden.' );
 }
 
-if (!class_exists('WPGraphQLGutenberg')) {
+if ( ! class_exists( 'WPGraphQLGutenberg' ) ) {
 	final class WPGraphQLGutenberg {
 		private static $instance;
 		public static function instance() {
-			if (!isset(self::$instance)) {
+			if ( ! isset( self::$instance ) ) {
 				self::$instance = new WPGraphQLGutenberg();
 			}
 
@@ -43,7 +43,7 @@ if (!class_exists('WPGraphQLGutenberg')) {
 			 * The codeception tests are an example of an environment where adding the autoloader again causes issues
 			 * so this is set to false for tests.
 			 */
-			if (defined('WP_GRAPHQL_GUTENBERG_AUTOLOAD') && true === WP_GRAPHQL_GUTENBERG_AUTOLOAD) {
+			if ( defined( 'WP_GRAPHQL_GUTENBERG_AUTOLOAD' ) && true === WP_GRAPHQL_GUTENBERG_AUTOLOAD ) {
 				// Autoload Required Classes.
 				include_once WP_GRAPHQL_GUTENBERG_PLUGIN_DIR . 'vendor/autoload.php';
 			}
@@ -51,33 +51,33 @@ if (!class_exists('WPGraphQLGutenberg')) {
 
 		private function setup_constants() {
 			// // Plugin version.
-			if (!defined('WP_GRAPHQL_GUTENBERG_VERSION')) {
-				define('WP_GRAPHQL_GUTENBERG_VERSION', '1.0.0');
+			if ( ! defined( 'WP_GRAPHQL_GUTENBERG_VERSION' ) ) {
+				define( 'WP_GRAPHQL_GUTENBERG_VERSION', '1.0.0' );
 			}
 
 			// Plugin Folder Path.
-			if (!defined('WP_GRAPHQL_GUTENBERG_PLUGIN_DIR')) {
-				define('WP_GRAPHQL_GUTENBERG_PLUGIN_DIR', plugin_dir_path(__FILE__));
+			if ( ! defined( 'WP_GRAPHQL_GUTENBERG_PLUGIN_DIR' ) ) {
+				define( 'WP_GRAPHQL_GUTENBERG_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 			}
 
 			// Plugin Folder URL.
-			if (!defined('WP_GRAPHQL_GUTENBERG_PLUGIN_URL')) {
-				define('WP_GRAPHQL_GUTENBERG_PLUGIN_URL', plugin_dir_url(__FILE__));
+			if ( ! defined( 'WP_GRAPHQL_GUTENBERG_PLUGIN_URL' ) ) {
+				define( 'WP_GRAPHQL_GUTENBERG_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
 			}
 
 			// Plugin Root File.
-			if (!defined('WP_GRAPHQL_GUTENBERG_PLUGIN_FILE')) {
-				define('WP_GRAPHQL_GUTENBERG_PLUGIN_FILE', __FILE__);
+			if ( ! defined( 'WP_GRAPHQL_GUTENBERG_PLUGIN_FILE' ) ) {
+				define( 'WP_GRAPHQL_GUTENBERG_PLUGIN_FILE', __FILE__ );
 			}
 
 			// Whether to autoload the files or not.
-			if (!defined('WP_GRAPHQL_GUTENBERG_AUTOLOAD')) {
-				define('WP_GRAPHQL_GUTENBERG_AUTOLOAD', true);
+			if ( ! defined( 'WP_GRAPHQL_GUTENBERG_AUTOLOAD' ) ) {
+				define( 'WP_GRAPHQL_GUTENBERG_AUTOLOAD', true );
 			}
 
 			// Whether to run the plugin in debug mode. Default is false.
-			if (!defined('WP_GRAPHQL_GUTENBERG_DEBUG')) {
-				define('WP_GRAPHQL_GUTENBERG_DEBUG', false);
+			if ( ! defined( 'WP_GRAPHQL_GUTENBERG_DEBUG' ) ) {
+				define( 'WP_GRAPHQL_GUTENBERG_DEBUG', false );
 			}
 		}
 
@@ -96,9 +96,9 @@ if (!class_exists('WPGraphQLGutenberg')) {
 				$this->server = new \WPGraphQLGutenberg\Server\Server();
 			});
 
-			add_filter('graphql_request_data', function ($request_data) {
-				if ($this->server->enabled() && $this->server->gutenberg_fields_in_query($request_data['query'])) {
-					Registry::update_registry(Registry::normalize($this->server->get_block_types()));
+			add_filter('graphql_request_data', function ( $request_data ) {
+				if ( $this->server->enabled() && $this->server->gutenberg_fields_in_query( $request_data['query'] ) ) {
+					Registry::update_registry( Registry::normalize( $this->server->get_block_types() ) );
 				}
 
 				return $request_data;

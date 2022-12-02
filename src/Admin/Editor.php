@@ -9,14 +9,15 @@ class Editor {
 		$asset_file = include WP_GRAPHQL_GUTENBERG_PLUGIN_DIR . 'build/index.asset.php';
 
 		wp_enqueue_script(
-			Editor::$script_name,
+			self::$script_name,
 			WP_GRAPHQL_GUTENBERG_PLUGIN_URL . 'build/index.js',
 			$asset_file['dependencies'],
-			$asset_file['version']
+			$asset_file['version'],
+			true
 		);
 	}
 
-	function __construct() {
+	public function __construct() {
 		add_action('enqueue_block_editor_assets', function () {
 			self::enqueue_script();
 		});
