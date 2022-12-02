@@ -4,6 +4,7 @@ namespace WPGraphQLGutenberg\Schema\Types\InterfaceType;
 
 use GraphQL\Deferred;
 use WPGraphQLGutenberg\Blocks\Block;
+use WPGraphQLGutenberg\Blocks\Utils as BlockUtils;
 use WPGraphQLGutenberg\Schema\Utils;
 use WPGraphQLGutenberg\Blocks\Registry;
 use WPGraphQLGutenberg\PostTypes\BlockEditorPreview;
@@ -23,7 +24,7 @@ class BlockEditorContentNode {
 				'description' => __('Gutenberg blocks', 'wp-graphql-gutenberg'),
 				'resolve' => function ($model, $args, $context, $info) {
 					return Block::create_blocks(
-						parse_blocks(get_post($model->ID)->post_content),
+						parse_blocks(BlockUtils::apply_content_filters(get_post($model->ID)->post_content)),
 						$model->ID,
 						Registry::get_registry()
 					);
@@ -34,7 +35,7 @@ class BlockEditorContentNode {
 				'description' => __('Gutenberg blocks as json string', 'wp-graphql-gutenberg'),
 				'resolve' => function ($model, $args, $context, $info) {
 					$blocks = Block::create_blocks(
-						parse_blocks(get_post($model->ID)->post_content),
+						parse_blocks(BlockUtils::apply_content_filters(get_post($model->ID)->post_content)),
 						$model->ID,
 						Registry::get_registry()
 					);
@@ -53,7 +54,7 @@ class BlockEditorContentNode {
 
 						if (!empty($id)) {
 							return Block::create_blocks(
-								parse_blocks(get_post($id)->post_content),
+								parse_blocks(BlockUtils::apply_content_filters(get_post($id)->post_content)),
 								$id,
 								Registry::get_registry()
 							);
@@ -76,7 +77,7 @@ class BlockEditorContentNode {
 						if (!empty($id)) {
 							return json_encode(
 								Block::create_blocks(
-									parse_blocks(get_post($id)->post_content),
+									parse_blocks(BlockUtils::apply_content_filters(get_post($id)->post_content)),
 									$id,
 									Registry::get_registry()
 								)
