@@ -9,9 +9,10 @@ if ( ! defined( 'WP_GRAPHQL_GUTENBERG_REGISTRY_OPTION_NAME' ) ) {
 use GraphQL\Error\ClientAware;
 
 class Registry {
-	public static function normalize( $block_types ) {
+	public static function normalize($block_types) {
 		return array_reduce(
-			static function ($arr, $block_type) {
+			$block_types,
+			function ($arr, $block_type) {
 				$arr[$block_type['name']] = $block_type;
 				return $arr;
 			},
