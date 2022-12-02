@@ -30,7 +30,7 @@ private static $installed = array (
     'aliases' => 
     array (
     ),
-    'reference' => 'b8177d3a47ad642a8c7707be066cb2ec2ae29093',
+    'reference' => '9aeb21b0790acefa2937bf41de0e33a1e00d16a8',
     'name' => 'pristas-peter/wp-graphql-gutenberg',
   ),
   'versions' => 
@@ -51,7 +51,7 @@ private static $installed = array (
       'aliases' => 
       array (
       ),
-      'reference' => 'b8177d3a47ad642a8c7707be066cb2ec2ae29093',
+      'reference' => '9aeb21b0790acefa2937bf41de0e33a1e00d16a8',
     ),
     'symfony/css-selector' => 
     array (
