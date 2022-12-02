@@ -1,6 +1,6 @@
 Opis JSON Schema
 ====================
-[![Build Status](https://travis-ci.org/opis/json-schema.png)](https://travis-ci.org/opis/json-schema)
+[![Tests](https://github.com/opis/json-schema/workflows/Tests/badge.svg)](https://github.com/opis/json-schema/actions)
 [![Latest Stable Version](https://poser.pugx.org/opis/json-schema/v/stable.png)](https://packagist.org/packages/opis/json-schema)
 [![Latest Unstable Version](https://poser.pugx.org/opis/json-schema/v/unstable.png)](https://packagist.org/packages/opis/json-schema)
 [![License](https://poser.pugx.org/opis/json-schema/license.png)](https://packagist.org/packages/opis/json-schema)
@@ -10,7 +10,7 @@ Validate JSON documents
 
 **Opis JSON Schema** is a PHP implementation for the [JSON Schema] standard (draft-07 and draft-06), that
 will help you validate all sorts of JSON documents, whether they are configuration files or a set 
-of data sent to an RESTful API endpoint.
+of data sent to a RESTful API endpoint.
 
 
 **The library's key features:**
