@@ -16,7 +16,7 @@
 		"gatsby-plugin-sharp": "^2.6.0",
 		"gatsby-remark-images": "^3.3.0",
 		"gatsby-theme-apollo-docs": "4.1.3",
-		"gatsby-transformer-remark": "^2.8.0",
+		"gatsby-transformer-remark": "^5.25.1",
 		"react": "16.13.1",
 		"react-dom": "16.13.1"
 	},
