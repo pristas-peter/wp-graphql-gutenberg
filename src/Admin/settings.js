@@ -77,6 +77,8 @@ class Settings extends Component {
 							`${ window.wpGraphqlGutenberg.adminUrl }post-new.php?post_type=${ window.wpGraphqlGutenberg.adminPostType }&action=edit&wpGraphqlGutenbergServer=true`
 						);
 
+						const adminUrl = window.wpGraphqlGutenberg.adminUrl.replace( '/wp-admin/', '' );
+
 						iframe.admin = {
 							queue: [
 								{
@@ -91,7 +93,7 @@ class Settings extends Component {
 									action: actions.GET_BLOCK_REGISTRY,
 									onComplete: ( result ) => {
 										apiFetch( {
-											path: 'wp-graphql-gutenberg/v1/block-registry',
+											url: `${adminUrl}/wp-json/wp-graphql-gutenberg/v1/block-registry`,
 											method: 'POST',
 											data: {
 												block_types: result,
