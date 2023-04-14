@@ -192,6 +192,13 @@ class Block implements ArrayAccess {
 
 			if ( ! empty( $reusable_post ) ) {
 				$inner_blocks = parse_blocks( $reusable_post->post_content );
+				// Filter out inner reusable blocks with the same ID to prevent infinite loop.
+				$inner_blocks = array_filter(
+					$inner_blocks,
+					function( $block ) use ( &$reusable_post ) {
+						return ! isset( $block['attrs']['ref'] ) || $block['attrs']['ref'] !== $reusable_post->ID;
+					}
+				);
 			}
 		}
 
