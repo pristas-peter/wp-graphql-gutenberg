@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/voku/simple_html_dom.svg?branch=master)](https://travis-ci.org/voku/simple_html_dom)
+[![Build Status](https://github.com/voku/simple_html_dom/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/voku/simple_html_dom/actions)
 [![Coverage Status](https://coveralls.io/repos/github/voku/simple_html_dom/badge.svg?branch=master)](https://coveralls.io/github/voku/simple_html_dom?branch=master)
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/3290fdc35c8f49ad9abdf053582466eb)](https://www.codacy.com/app/voku/simple_html_dom?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=voku/simple_html_dom&amp;utm_campaign=Badge_Grade)
 [![Latest Stable Version](https://poser.pugx.org/voku/simple_html_dom/v/stable)](https://packagist.org/packages/voku/simple_html_dom) 
@@ -12,7 +12,7 @@
 A HTML DOM parser written in PHP - let you manipulate HTML in a very easy way!
 This is a fork of [PHP Simple HTML DOM Parser project](http://simplehtmldom.sourceforge.net/) but instead of string manipulation we use DOMDocument and modern php classes like "Symfony CssSelector".
 
-- PHP 7.0+ Support
+- PHP 7.0+ & 8.0 Support
 - PHP-FIG Standard
 - Composer & PSR-4 support
 - PHPUnit testing via Travis CI
@@ -56,6 +56,10 @@ $elementsOrFalse = $dom->findMultiOrFalse('.css-selector'); // "$elementsOrFalse
 ### Examples
 
 [github.com/voku/simple_html_dom/tree/master/example](https://github.com/voku/simple_html_dom/tree/master/example)
+
+### API
+
+[github.com/voku/simple_html_dom/tree/master/README_API.md](https://github.com/voku/simple_html_dom/tree/master/README_API.md)
 
 ### Support
 
