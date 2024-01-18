@@ -227,18 +227,22 @@ class Block implements ArrayAccess {
 		return render_block( $data );
 	}
 
-	public function offsetExists( $offset ) {
+	#[\ReturnTypeWillChange]
+	public function offsetExists( mixed $offset ): mixed {
 		return isset( $this->$offset );
 	}
 
+	#[\ReturnTypeWillChange]
 	public function offsetGet( $offset ) {
 		return $this->$offset;
 	}
 
-	public function offsetSet( $offset, $value ) {
+	#[\ReturnTypeWillChange]
+	public function offsetSet( mixed $offset, mixed $value ): void {
 		$this->$offset = $value;
 	}
 
+	#[\ReturnTypeWillChange]
 	public function offsetUnset( $offset ) {
 		unset( $this->$offset );
 	}

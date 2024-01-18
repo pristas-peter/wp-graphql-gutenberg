@@ -40,6 +40,10 @@ class BlockTypes {
 	protected static function get_attribute_type( $name, $attribute, $prefix ) {
 		$type = null;
 
+		if ('templateLock' == $name) {
+			return $type;
+		}
+		
 		if ( isset( $attribute['type'] ) ) {
 			switch ( $attribute['type'] ) {
 				case 'string':

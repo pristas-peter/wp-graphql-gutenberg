@@ -2,7 +2,7 @@
 
 namespace WPGraphQLGutenberg\Schema\Types\Connection;
 
-use WPGraphQL\Connection\PostObjects;
+use WPGraphQL\Type\Connection\PostObjects;
 use WPGraphQLGutenberg\Schema\Utils;
 
 class BlockEditorContentNodeConnection {
@@ -22,7 +22,7 @@ class BlockEditorContentNodeConnection {
 						$info,
 						'post'
 					);
-					$resolver->setQueryArg( 'post_type', Utils::get_graphql_allowed_editor_post_types() );
+					$resolver->set_query_arg( 'post_type', Utils::get_graphql_allowed_editor_post_types() );
 					$connection = $resolver->get_connection();
 					return $connection;
 				},

@@ -308,7 +308,7 @@ class HtmlDomParser extends AbstractDomParser
 
         // set error level
         $internalErrors = \libxml_use_internal_errors(true);
-        $disableEntityLoader = \libxml_disable_entity_loader(true);
+        $disableEntityLoader = @\libxml_disable_entity_loader(true);
         \libxml_clear_errors();
 
         $optionsXml = \LIBXML_DTDLOAD | \LIBXML_DTDATTR | \LIBXML_NONET;
@@ -382,7 +382,7 @@ class HtmlDomParser extends AbstractDomParser
         // restore lib-xml settings
         \libxml_clear_errors();
         \libxml_use_internal_errors($internalErrors);
-        \libxml_disable_entity_loader($disableEntityLoader);
+        @\libxml_disable_entity_loader($disableEntityLoader);
 
         return $this->document;
     }
