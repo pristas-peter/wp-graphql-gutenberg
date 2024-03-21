@@ -57,6 +57,16 @@ class Block implements ArrayAccess {
 			$source = $value['source'] ?? null;
 
 			switch ( $source ) {
+				case 'rich-text':
+					// Most 'html' sources were converted to 'rich-text' in WordPress 6.5.
+					// https://github.com/WordPress/gutenberg/pull/43204
+					$source_node = ! empty( $value['selector'] ) ? $node->findOne( $value['selector'] ) : $node;
+
+					if ( $source_node ) {
+						$result[ $key ] = $source_node->innerhtml;
+					}
+
+					break;
 				case 'html':
 					$source_node = ! empty( $value['selector'] ) ? $node->findOne( $value['selector'] ) : $node;
 
