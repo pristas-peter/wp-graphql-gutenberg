@@ -2,7 +2,7 @@
 
 namespace WPGraphQLGutenberg\Schema\Types\Connection;
 
-use WPGraphQL\Connection\PostObjects;
+use WPGraphQL\Type\Connection\PostObjects;
 use WPGraphQLGutenberg\Schema\Utils;
 
 class BlockEditorContentNodeConnection {
