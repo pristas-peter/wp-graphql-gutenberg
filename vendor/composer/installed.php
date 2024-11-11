@@ -1,60 +1,59 @@
-<?php return array (
-  'root' => 
-  array (
-    'pretty_version' => 'dev-master',
-    'version' => 'dev-master',
-    'aliases' => 
-    array (
+<?php return array(
+    'root' => array(
+        'name' => 'pristas-peter/wp-graphql-gutenberg',
+        'pretty_version' => 'dev-develop',
+        'version' => 'dev-develop',
+        'reference' => '701b154450a3dac5bfb2ec3732c479bb729d6d28',
+        'type' => 'wordpress-plugin',
+        'install_path' => __DIR__ . '/../../',
+        'aliases' => array(),
+        'dev' => false,
     ),
-    'reference' => '9aeb21b0790acefa2937bf41de0e33a1e00d16a8',
-    'name' => 'pristas-peter/wp-graphql-gutenberg',
-  ),
-  'versions' => 
-  array (
-    'opis/json-schema' => 
-    array (
-      'pretty_version' => '1.1.0',
-      'version' => '1.1.0.0',
-      'aliases' => 
-      array (
-      ),
-      'reference' => '39d8072be8657a329a284339994401066406c43b',
+    'versions' => array(
+        'opis/json-schema' => array(
+            'pretty_version' => '1.1.0',
+            'version' => '1.1.0.0',
+            'reference' => '39d8072be8657a329a284339994401066406c43b',
+            'type' => 'library',
+            'install_path' => __DIR__ . '/../opis/json-schema',
+            'aliases' => array(),
+            'dev_requirement' => false,
+        ),
+        'pristas-peter/wp-graphql-gutenberg' => array(
+            'pretty_version' => 'dev-develop',
+            'version' => 'dev-develop',
+            'reference' => '701b154450a3dac5bfb2ec3732c479bb729d6d28',
+            'type' => 'wordpress-plugin',
+            'install_path' => __DIR__ . '/../../',
+            'aliases' => array(),
+            'dev_requirement' => false,
+        ),
+        'symfony/css-selector' => array(
+            'pretty_version' => 'v5.4.26',
+            'version' => '5.4.26.0',
+            'reference' => '0ad3f7e9a1ab492c5b4214cf22a9dc55dcf8600a',
+            'type' => 'library',
+            'install_path' => __DIR__ . '/../symfony/css-selector',
+            'aliases' => array(),
+            'dev_requirement' => false,
+        ),
+        'symfony/polyfill-php80' => array(
+            'pretty_version' => 'v1.28.0',
+            'version' => '1.28.0.0',
+            'reference' => '6caa57379c4aec19c0a12a38b59b26487dcfe4b5',
+            'type' => 'library',
+            'install_path' => __DIR__ . '/../symfony/polyfill-php80',
+            'aliases' => array(),
+            'dev_requirement' => false,
+        ),
+        'voku/simple_html_dom' => array(
+            'pretty_version' => '4.7.31',
+            'version' => '4.7.31.0',
+            'reference' => '2bc2f89d9124bd2fd4817c73facf29a8b5be3c97',
+            'type' => 'library',
+            'install_path' => __DIR__ . '/../voku/simple_html_dom',
+            'aliases' => array(),
+            'dev_requirement' => false,
+        ),
     ),
-    'pristas-peter/wp-graphql-gutenberg' => 
-    array (
-      'pretty_version' => 'dev-master',
-      'version' => 'dev-master',
-      'aliases' => 
-      array (
-      ),
-      'reference' => '9aeb21b0790acefa2937bf41de0e33a1e00d16a8',
-    ),
-    'symfony/css-selector' => 
-    array (
-      'pretty_version' => 'v5.4.11',
-      'version' => '5.4.11.0',
-      'aliases' => 
-      array (
-      ),
-      'reference' => 'c1681789f059ab756001052164726ae88512ae3d',
-    ),
-    'symfony/polyfill-php80' => 
-    array (
-      'pretty_version' => 'v1.27.0',
-      'version' => '1.27.0.0',
-      'aliases' => 
-      array (
-      ),
-      'reference' => '7a6ff3f1959bb01aefccb463a0f2cd3d3d2fd936',
-    ),
-    'voku/simple_html_dom' => 
-    array (
-      'pretty_version' => '4.7.17',
-      'version' => '4.7.17.0',
-      'aliases' => 
-      array (
-      ),
-      'reference' => '804aca422f1fe0104b1320ca09fd06cd0062782c',
-    ),
-  ),
 );
