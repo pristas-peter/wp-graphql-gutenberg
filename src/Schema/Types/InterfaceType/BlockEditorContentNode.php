@@ -4,6 +4,7 @@ namespace WPGraphQLGutenberg\Schema\Types\InterfaceType;
 
 use GraphQL\Deferred;
 use WPGraphQLGutenberg\Blocks\Block;
+use WPGraphQLGutenberg\Blocks\BlocksJSON;
 use WPGraphQLGutenberg\Schema\Utils;
 use WPGraphQLGutenberg\Blocks\Registry;
 use WPGraphQLGutenberg\PostTypes\BlockEditorPreview;
@@ -39,7 +40,7 @@ class BlockEditorContentNode {
 						Registry::get_registry()
 					);
 
-					return wp_json_encode( $blocks );
+					return BlocksJSON::encode_blocks( $blocks, $model );
 				},
 			],
 			'previewBlocks'     => [
@@ -74,12 +75,13 @@ class BlockEditorContentNode {
 						$id = BlockEditorPreview::get_preview_id( $model->ID, $model->ID );
 
 						if ( ! empty( $id ) ) {
-							return wp_json_encode(
+							return BlocksJSON::encode_blocks(
 								Block::create_blocks(
 									parse_blocks( get_post( $id )->post_content ),
 									$id,
 									Registry::get_registry()
-								)
+								),
+								$model
 							);
 						}
 

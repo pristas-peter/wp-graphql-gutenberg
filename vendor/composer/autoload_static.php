@@ -167,6 +167,7 @@ class ComposerStaticInit1ae93f46350550e5030837be01a3fdf8
         'WPGraphQLGutenberg\\Admin\\Editor' => __DIR__ . '/../..' . '/src/Admin/Editor.php',
         'WPGraphQLGutenberg\\Admin\\Settings' => __DIR__ . '/../..' . '/src/Admin/Settings.php',
         'WPGraphQLGutenberg\\Blocks\\Block' => __DIR__ . '/../..' . '/src/Blocks/Block.php',
+        'WPGraphQLGutenberg\\Blocks\\BlocksJSON' => __DIR__ . '/../..' . '/src/Blocks/BlocksJSON.php',
         'WPGraphQLGutenberg\\Blocks\\Registry' => __DIR__ . '/../..' . '/src/Blocks/Registry.php',
         'WPGraphQLGutenberg\\Blocks\\RegistryNotSourcedException' => __DIR__ . '/../..' . '/src/Blocks/RegistryNotSourcedException.php',
         'WPGraphQLGutenberg\\Blocks\\Utils' => __DIR__ . '/../..' . '/src/Blocks/Utils.php',

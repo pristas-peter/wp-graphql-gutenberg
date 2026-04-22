@@ -6,6 +6,7 @@ use WP_Query;
 use WP_REST_Request;
 use WPGraphQL\Utils\Utils;
 use WPGraphQLGutenberg\Blocks\Block;
+use WPGraphQLGutenberg\Blocks\BlocksJSON;
 use WPGraphQLGutenberg\Blocks\Registry;
 use WPGraphQLGutenberg\Schema\Utils as SchemaUtils;
 
@@ -277,12 +278,13 @@ class BlockEditorPreview {
 			register_graphql_field(WP_GRAPHQL_GUTENBERG_PREVIEW_GRAPHQL_SINGLE_NAME, 'blocksJSON', [
 				'type'    => 'String',
 				'resolve' => function ( $model ) {
-					return wp_json_encode(
+					return BlocksJSON::encode_blocks(
 						Block::create_blocks(
 							parse_blocks( get_post( $model->ID )->post_content ),
 							$model->ID,
 							Registry::get_registry()
-						)
+						),
+						$model
 					);
 				},
 			]);
