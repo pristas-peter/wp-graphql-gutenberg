@@ -149,6 +149,7 @@ class Block implements ArrayAccess {
 		if ( null === $block_type ) {
 			return [
 				'attributes' => $attributes,
+				'type'       => null,
 			];
 		}
 
