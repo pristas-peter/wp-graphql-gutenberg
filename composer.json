@@ -38,6 +38,6 @@
 	},
 	"require": {
 		"opis/json-schema": "^1.0",
-		"voku/simple_html_dom": "4.7.17"
+		"voku/simple_html_dom": "4.8.10"
 	}
 }

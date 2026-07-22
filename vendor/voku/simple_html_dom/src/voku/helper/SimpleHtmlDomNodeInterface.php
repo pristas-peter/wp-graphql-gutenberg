@@ -74,7 +74,7 @@ interface SimpleHtmlDomNodeInterface extends \IteratorAggregate
      *
      * @param string $selector
      *
-     * @return SimpleHtmlDomNode|null
+     * @return SimpleHtmlDomNodeInterface
      */
     public function findOne(string $selector);
 
@@ -83,7 +83,7 @@ interface SimpleHtmlDomNodeInterface extends \IteratorAggregate
      *
      * @param string $selector
      *
-     * @return false|SimpleHtmlDomNode
+     * @return false|SimpleHtmlDomNodeInterface
      */
     public function findOneOrFalse(string $selector);
 

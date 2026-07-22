@@ -56,6 +56,8 @@ abstract class AbstractDomParser implements DomParserInterface
 
     /**
      * @var callable|null
+     *
+     * @phpstan-var null|callable(\voku\helper\XmlDomParser|\voku\helper\HtmlDomParser): void
      */
     protected static $callback;
 
@@ -107,8 +109,6 @@ abstract class AbstractDomParser implements DomParserInterface
         $this->document = clone $this->document;
     }
 
-    /** @noinspection MagicMethodsValidityInspection */
-
     /**
      * @param string $name
      *
@@ -153,7 +153,6 @@ abstract class AbstractDomParser implements DomParserInterface
     {
         if ($multiDecodeNewHtmlEntity) {
             if (\class_exists('\voku\helper\UTF8')) {
-                /** @noinspection PhpUndefinedClassInspection */
                 $content = UTF8::rawurldecode($content, true);
             } else {
                 do {
@@ -170,7 +169,6 @@ abstract class AbstractDomParser implements DomParserInterface
         } else {
             /** @noinspection NestedPositiveIfStatementsInspection */
             if (\class_exists('\voku\helper\UTF8')) {
-                /** @noinspection PhpUndefinedClassInspection */
                 $content = UTF8::rawurldecode($content, false);
             } else {
                 $content = \rawurldecode(
@@ -190,6 +188,8 @@ abstract class AbstractDomParser implements DomParserInterface
      *
      * @param string   $selector
      * @param int|null $idx
+     *
+     * @return mixed
      */
     abstract public function find(string $selector, $idx = null);
 
@@ -197,6 +197,8 @@ abstract class AbstractDomParser implements DomParserInterface
      * Find nodes with a CSS selector.
      *
      * @param string $selector
+     *
+     * @return mixed
      */
     abstract public function findMulti(string $selector);
 
@@ -204,6 +206,8 @@ abstract class AbstractDomParser implements DomParserInterface
      * Find nodes with a CSS selector or false, if no element is found.
      *
      * @param string $selector
+     *
+     * @return mixed
      */
     abstract public function findMultiOrFalse(string $selector);
 
@@ -211,6 +215,8 @@ abstract class AbstractDomParser implements DomParserInterface
      * Find one node with a CSS selector.
      *
      * @param string $selector
+     *
+     * @return mixed
      */
     abstract public function findOne(string $selector);
 
@@ -218,6 +224,8 @@ abstract class AbstractDomParser implements DomParserInterface
      * Find one node with a CSS selector or false, if no element is found.
      *
      * @param string $selector
+     *
+     * @return mixed
      */
     abstract public function findOneOrFalse(string $selector);
 
@@ -233,19 +241,21 @@ abstract class AbstractDomParser implements DomParserInterface
      * Get dom node's outer html.
      *
      * @param bool $multiDecodeNewHtmlEntity
+     * @param bool $putBrokenReplacedBack
      *
      * @return string
      */
-    abstract public function html(bool $multiDecodeNewHtmlEntity = false): string;
+    abstract public function html(bool $multiDecodeNewHtmlEntity = false, bool $putBrokenReplacedBack = true): string;
 
     /**
      * Get dom node's inner html.
      *
      * @param bool $multiDecodeNewHtmlEntity
+     * @param bool $putBrokenReplacedBack
      *
      * @return string
      */
-    public function innerHtml(bool $multiDecodeNewHtmlEntity = false): string
+    public function innerHtml(bool $multiDecodeNewHtmlEntity = false, bool $putBrokenReplacedBack = true): string
     {
         // init
         $text = '';
@@ -256,7 +266,7 @@ abstract class AbstractDomParser implements DomParserInterface
             }
         }
 
-        return $this->fixHtmlOutput($text, $multiDecodeNewHtmlEntity);
+        return $this->fixHtmlOutput($text, $multiDecodeNewHtmlEntity, $putBrokenReplacedBack);
     }
 
     /**
@@ -321,6 +331,10 @@ abstract class AbstractDomParser implements DomParserInterface
 
     /**
      * @param callable $functionName
+     *
+     * @phpstan-param callable(\voku\helper\XmlDomParser|\voku\helper\HtmlDomParser): void $functionName
+     *
+     * @return void
      */
     public function set_callback($functionName)
     {
@@ -389,12 +403,14 @@ abstract class AbstractDomParser implements DomParserInterface
      * workaround for bug: https://bugs.php.net/bug.php?id=74628
      *
      * @param string $html
+     *
+     * @return void
      */
     protected function html5FallbackForScriptTags(string &$html)
     {
         // regEx for e.g.: [<script id="elements-image-2">...<script>]
         /** @noinspection HtmlDeprecatedTag */
-        $regExSpecialScript = '/<(script)(?<attr>[^>]*)>(?<content>.*)<\/\1>/isU';
+        $regExSpecialScript = '/<script(?<attr>[^>]*?)>(?<content>.*)<\/script>/isU';
         $htmlTmp = \preg_replace_callback(
             $regExSpecialScript,
             static function ($scripts) {
@@ -417,7 +433,7 @@ abstract class AbstractDomParser implements DomParserInterface
      *
      * @return string
      */
-    public static function putReplacedBackToPreserveHtmlEntities(string $html): string
+    public static function putReplacedBackToPreserveHtmlEntities(string $html, bool $putBrokenReplacedBack = true): string
     {
         static $DOM_REPLACE__HELPER_CACHE = null;
 
@@ -437,14 +453,28 @@ abstract class AbstractDomParser implements DomParserInterface
             $DOM_REPLACE__HELPER_CACHE['orig']['html_wrapper__start'] = '';
             $DOM_REPLACE__HELPER_CACHE['orig']['html_wrapper__end'] = '';
 
+            $DOM_REPLACE__HELPER_CACHE['tmp']['html_wrapper__start_broken'] = self::$domHtmlWrapperHelper . '>';
+            $DOM_REPLACE__HELPER_CACHE['tmp']['html_wrapper__end_broken'] = '</' . self::$domHtmlWrapperHelper;
+
+            $DOM_REPLACE__HELPER_CACHE['orig']['html_wrapper__start_broken'] = '';
+            $DOM_REPLACE__HELPER_CACHE['orig']['html_wrapper__end_broken'] = '';
+
             $DOM_REPLACE__HELPER_CACHE['tmp']['html_special_script__start'] = '<' . self::$domHtmlSpecialScriptHelper;
             $DOM_REPLACE__HELPER_CACHE['tmp']['html_special_script__end'] = '</' . self::$domHtmlSpecialScriptHelper . '>';
 
             $DOM_REPLACE__HELPER_CACHE['orig']['html_special_script__start'] = '<script';
             $DOM_REPLACE__HELPER_CACHE['orig']['html_special_script__end'] = '</script>';
+
+            $DOM_REPLACE__HELPER_CACHE['tmp']['html_special_script__start_broken'] = self::$domHtmlSpecialScriptHelper;
+            $DOM_REPLACE__HELPER_CACHE['tmp']['html_special_script__end_broken'] = '</' . self::$domHtmlSpecialScriptHelper;
+
+            $DOM_REPLACE__HELPER_CACHE['orig']['html_special_script__start_broken'] = 'script';
+            $DOM_REPLACE__HELPER_CACHE['orig']['html_special_script__end_broken'] = '</script';
         }
 
         if (
+            $putBrokenReplacedBack === true
+            &&
             isset(self::$domBrokenReplaceHelper['tmp'])
             &&
             \count(self::$domBrokenReplaceHelper['tmp']) > 0
@@ -467,9 +497,8 @@ abstract class AbstractDomParser implements DomParserInterface
         $linksOld = [];
 
         if (\strpos($html, 'http') !== false) {
-
             // regEx for e.g.: [https://www.domain.de/foo.php?foobar=1&email=lars%40moelleken.org&guid=test1233312&{{foo}}#foo]
-            $regExUrl = '/(\[?\bhttps?:\/\/[^\s<>]+(?:\([\w]+\)|[^[:punct:]\s]|\/|\}|\]))/i';
+            $regExUrl = '/(\[?\bhttps?:\/\/[^\s<>]+(?:\(\w+\)|[^[:punct:]\s]|\/|}|]))/i';
             \preg_match_all($regExUrl, $html, $linksOld);
 
             if (!empty($linksOld[1])) {

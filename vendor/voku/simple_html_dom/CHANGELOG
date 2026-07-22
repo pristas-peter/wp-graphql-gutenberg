@@ -1,3 +1,19 @@
+[PHP Simple HTML Dom v4.8.x]
+0: refactor -> findOne() -> will now return always an "Blank" object if no element was found
+1: "SimpleXmlDomNodeInterface" -> fix phpdocs only
+2: "*NodeBlank" -> fix return type from "findOne()"
+3: "innerhtmlKeep" -> added for modifying html without loosing html-hacks for e.g. svg elements
+4: "HtmlDomHelper" -> added "mergeHtmlAttributes()"
+5: "HtmlDomParser" -> hack for multiple root elements
+6: "AbstractSimpleHtmlDom" -> PHP 8.1 -> try to fix php type errors
+7: "XmlDomParser" -> added workaround for DTD requests
+8: "Replace deprecated string interpolation usage" thanks @flavioheleno [Flávio Heleno]
+9: "Adding 'id' to DOMNodes with type string." thanks @devteam-emroc [Dev Team - emroc GmbH]
+   "Add symfony 7 support" thanks @GerB
+   "Fix error in parent() method if no parent node" thanks @DieterHolvoet [Dieter Holvoet]
+   "Add text/template type" thanks @all9lives [Jeremy Brennan]
+   "fix: Cannot assign null to property DOMNode::* of type string" thanks @frugan-dev [Frugan]
+10: "fix: HtmlDomHelper::mergeHtmlAttributes() with zero values"
 
 [PHP Simple HTML Dom v4.7.x]
 1: add "findMultiOrFalse()" + "findOneOrFalse()"
@@ -13,7 +29,22 @@
 14: fix -> keep html comments, also at the beginning of the html input
 15: add "HtmlDomParser->overwriteTemplateLogicSyntaxInSpecialScriptTags()"
 16: add support for "text/x-handlebars-template"
-
+17: fix -> problem with auto-completion in e.g. PhpStorm
+18: small optimizations + fix phpstan reported errors
+19: add support for different special script-tags
+20: fix -> invalid html (move html that is after "</html>" before "</html>")
+21: fix -> internal invalid self-closing tags (e.g. <wbr>)
+22: fix -> invalid html (remove content before "<!doctype.*>")
+23: fix -> invalid html (remove content before "<!doctype.*>") + try to repair broken html
+24: fix -> normalize the html after replacing the node
+25: add support for PHP 8
+26: fix -> fix "setAttribute()" -> for e.g. urls
+27: fix -> "XmlDomParser" -> add option for "auto-remove-xpath-namespace"
+28: fix -> allow CSS and xPath syntax for XmlDomParser
+29: use github actions
+30: add "previousNonWhitespaceSibling()"
+31: add "SimpleHtmlDom->delete()" & "SimpleHtmlDom->getTag()" thanks @marioquartz
+    add support for "symfony/css-selector": ~6.0 thanks @dora38
 
 [PHP Simple HTML Dom v4.6.x]
 1: add an XmlDomParser Class + simple tests

@@ -92,7 +92,7 @@ interface SimpleXmlDomInterface extends \IteratorAggregate
     public function childNodes(int $idx = -1);
 
     /**
-     * Find list of nodes with a CSS selector.
+     * Find list of nodes with a CSS or xPath selector.
      *
      * @param string   $selector
      * @param int|null $idx
@@ -102,7 +102,7 @@ interface SimpleXmlDomInterface extends \IteratorAggregate
     public function find(string $selector, $idx = null);
 
     /**
-     * Find nodes with a CSS selector.
+     * Find nodes with a CSS or xPath selector.
      *
      * @param string $selector
      *
@@ -111,7 +111,7 @@ interface SimpleXmlDomInterface extends \IteratorAggregate
     public function findMulti(string $selector): SimpleXmlDomNodeInterface;
 
     /**
-     * Find nodes with a CSS selector or false, if no element is found.
+     * Find nodes with a CSS or xPath selector or false, if no element is found.
      *
      * @param string $selector
      *
@@ -120,7 +120,7 @@ interface SimpleXmlDomInterface extends \IteratorAggregate
     public function findMultiOrFalse(string $selector);
 
     /**
-     * Find one node with a CSS selector.
+     * Find one node with a CSS or xPath selector.
      *
      * @param string $selector
      *
@@ -129,7 +129,7 @@ interface SimpleXmlDomInterface extends \IteratorAggregate
     public function findOne(string $selector): self;
 
     /**
-     * Find one node with a CSS selector or false, if no element is found.
+     * Find one node with a CSS or xPath selector or false, if no element is found.
      *
      * @param string $selector
      *
@@ -250,10 +250,11 @@ interface SimpleXmlDomInterface extends \IteratorAggregate
      * Get dom node's inner html.
      *
      * @param bool $multiDecodeNewHtmlEntity
+     * @param bool $putBrokenReplacedBack
      *
      * @return string
      */
-    public function innerHtml(bool $multiDecodeNewHtmlEntity = false): string;
+    public function innerHtml(bool $multiDecodeNewHtmlEntity = false, bool $putBrokenReplacedBack = true): string;
 
     /**
      * Get dom node's inner html.
@@ -309,6 +310,13 @@ interface SimpleXmlDomInterface extends \IteratorAggregate
     public function previousSibling();
 
     /**
+     * Returns the previous sibling of node.
+     *
+     * @return SimpleXmlDomInterface|null
+     */
+    public function previousNonWhitespaceSibling();
+
+    /**
      * Remove attribute.
      *
      * @param string $name <p>The name of the html-attribute.</p>
@@ -322,14 +330,14 @@ interface SimpleXmlDomInterface extends \IteratorAggregate
      *
      * @param string      $name       <p>The name of the html-attribute.</p>
      * @param string|null $value      <p>Set to NULL or empty string, to remove the attribute.</p>
-     * @param bool        $strict     </p>
+     * @param bool        $strictEmptyValueCheck     </p>
      *                                $value must be NULL, to remove the attribute,
      *                                so that you can set an empty string as attribute-value e.g. autofocus=""
      *                                </p>
      *
      * @return SimpleXmlDomInterface
      */
-    public function setAttribute(string $name, $value = null, bool $strict = false): self;
+    public function setAttribute(string $name, $value = null, bool $strictEmptyValueCheck = false): self;
 
     /**
      * Get dom node's plain text.

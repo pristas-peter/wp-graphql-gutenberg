@@ -41,7 +41,7 @@ class SimpleXmlDom extends AbstractSimpleXmlDom implements \IteratorAggregate, S
     }
 
     /**
-     * Find list of nodes with a CSS selector.
+     * Find list of nodes with a CSS or xPath selector.
      *
      * @param string   $selector
      * @param int|null $idx
@@ -60,9 +60,13 @@ class SimpleXmlDom extends AbstractSimpleXmlDom implements \IteratorAggregate, S
      */
     public function getAllAttributes()
     {
-        if ($this->node->hasAttributes()) {
+        if (
+            $this->node
+            &&
+            $this->node->hasAttributes()
+        ) {
             $attributes = [];
-            foreach ($this->node->attributes as $attr) {
+            foreach ($this->node->attributes ?? [] as $attr) {
                 $attributes[$attr->name] = XmlDomParser::putReplacedBackToPreserveHtmlEntities($attr->value);
             }
 
@@ -146,19 +150,21 @@ class SimpleXmlDom extends AbstractSimpleXmlDom implements \IteratorAggregate, S
      * Replace child node.
      *
      * @param string $string
+     * @param bool   $putBrokenReplacedBack
      *
      * @return SimpleXmlDomInterface
      */
-    protected function replaceChildWithString(string $string): SimpleXmlDomInterface
+    protected function replaceChildWithString(string $string, bool $putBrokenReplacedBack = true): SimpleXmlDomInterface
     {
         if (!empty($string)) {
             $newDocument = new XmlDomParser($string);
 
             $tmpDomString = $this->normalizeStringForComparision($newDocument);
             $tmpStr = $this->normalizeStringForComparision($string);
+
             if ($tmpDomString !== $tmpStr) {
                 throw new \RuntimeException(
-                    'Not valid HTML fragment!' . "\n" .
+                    'Not valid XML fragment!' . "\n" .
                     $tmpDomString . "\n" .
                     $tmpStr
                 );
@@ -181,9 +187,9 @@ class SimpleXmlDom extends AbstractSimpleXmlDom implements \IteratorAggregate, S
         if (!empty($newDocument)) {
             $ownerDocument = $this->node->ownerDocument;
             if (
-                $ownerDocument !== null
+                $ownerDocument
                 &&
-                $newDocument->getDocument()->documentElement !== null
+                $newDocument->getDocument()->documentElement
             ) {
                 $newNode = $ownerDocument->importNode($newDocument->getDocument()->documentElement, true);
                 /** @noinspection UnusedFunctionResultInspection */
@@ -204,7 +210,9 @@ class SimpleXmlDom extends AbstractSimpleXmlDom implements \IteratorAggregate, S
     protected function replaceNodeWithString(string $string): SimpleXmlDomInterface
     {
         if (empty($string)) {
-            $this->node->parentNode->removeChild($this->node);
+            if ($this->node->parentNode) {
+                $this->node->parentNode->removeChild($this->node);
+            }
 
             return $this;
         }
@@ -213,9 +221,10 @@ class SimpleXmlDom extends AbstractSimpleXmlDom implements \IteratorAggregate, S
 
         $tmpDomOuterTextString = $this->normalizeStringForComparision($newDocument);
         $tmpStr = $this->normalizeStringForComparision($string);
+
         if ($tmpDomOuterTextString !== $tmpStr) {
             throw new \RuntimeException(
-                'Not valid HTML fragment!' . "\n"
+                'Not valid XML fragment!' . "\n"
                 . $tmpDomOuterTextString . "\n" .
                 $tmpStr
             );
@@ -248,13 +257,15 @@ class SimpleXmlDom extends AbstractSimpleXmlDom implements \IteratorAggregate, S
     protected function replaceTextWithString($string): SimpleXmlDomInterface
     {
         if (empty($string)) {
-            $this->node->parentNode->removeChild($this->node);
+            if ($this->node->parentNode) {
+                $this->node->parentNode->removeChild($this->node);
+            }
 
             return $this;
         }
 
         $ownerDocument = $this->node->ownerDocument;
-        if ($ownerDocument !== null) {
+        if ($ownerDocument) {
             $newElement = $ownerDocument->createTextNode($string);
             $newNode = $ownerDocument->importNode($newElement, true);
             $this->node->parentNode->replaceChild($newNode, $this->node);
@@ -269,25 +280,25 @@ class SimpleXmlDom extends AbstractSimpleXmlDom implements \IteratorAggregate, S
      *
      * @param string      $name       <p>The name of the html-attribute.</p>
      * @param string|null $value      <p>Set to NULL or empty string, to remove the attribute.</p>
-     * @param bool        $strict     </p>
+     * @param bool        $strictEmptyValueCheck     </p>
      *                                $value must be NULL, to remove the attribute,
      *                                so that you can set an empty string as attribute-value e.g. autofocus=""
      *                                </p>
      *
      * @return SimpleXmlDomInterface
      */
-    public function setAttribute(string $name, $value = null, bool $strict = false): SimpleXmlDomInterface
+    public function setAttribute(string $name, $value = null, bool $strictEmptyValueCheck = false): SimpleXmlDomInterface
     {
         if (
-            ($strict && $value === null)
+            ($strictEmptyValueCheck && $value === null)
             ||
-            (!$strict && empty($value))
+            (!$strictEmptyValueCheck && empty($value))
         ) {
             /** @noinspection UnusedFunctionResultInspection */
             $this->removeAttribute($name);
         } elseif (\method_exists($this->node, 'setAttribute')) {
             /** @noinspection UnusedFunctionResultInspection */
-            $this->node->setAttribute($name, $value);
+            $this->node->setAttribute($name, HtmlDomParser::replaceToPreserveHtmlEntities((string) $value));
         }
 
         return $this;
@@ -328,25 +339,26 @@ class SimpleXmlDom extends AbstractSimpleXmlDom implements \IteratorAggregate, S
     protected function changeElementName(\DOMNode $node, string $name)
     {
         $ownerDocument = $node->ownerDocument;
-        if ($ownerDocument) {
-            $newNode = $ownerDocument->createElement($name);
-        } else {
+        if (!$ownerDocument) {
             return false;
         }
 
+        $newNode = $ownerDocument->createElement($name);
+
         foreach ($node->childNodes as $child) {
             $child = $ownerDocument->importNode($child, true);
-            /** @noinspection UnusedFunctionResultInspection */
             $newNode->appendChild($child);
         }
 
-        foreach ($node->attributes as $attrName => $attrNode) {
+        foreach ($node->attributes ?? [] as $attrName => $attrNode) {
             /** @noinspection UnusedFunctionResultInspection */
             $newNode->setAttribute($attrName, $attrNode);
         }
 
-        /** @noinspection UnusedFunctionResultInspection */
-        $newNode->ownerDocument->replaceChild($newNode, $node);
+        if ($newNode->ownerDocument) {
+            /** @noinspection UnusedFunctionResultInspection */
+            $newNode->ownerDocument->replaceChild($newNode, $node);
+        }
 
         return $newNode;
     }
@@ -370,7 +382,7 @@ class SimpleXmlDom extends AbstractSimpleXmlDom implements \IteratorAggregate, S
     }
 
     /**
-     * Find nodes with a CSS selector.
+     * Find nodes with a CSS or xPath selector.
      *
      * @param string $selector
      *
@@ -382,7 +394,7 @@ class SimpleXmlDom extends AbstractSimpleXmlDom implements \IteratorAggregate, S
     }
 
     /**
-     * Find nodes with a CSS selector.
+     * Find nodes with a CSS or xPath selector.
      *
      * @param string $selector
      *
@@ -394,7 +406,7 @@ class SimpleXmlDom extends AbstractSimpleXmlDom implements \IteratorAggregate, S
     }
 
     /**
-     * Find one node with a CSS selector.
+     * Find one node with a CSS or xPath selector.
      *
      * @param string $selector
      *
@@ -406,7 +418,7 @@ class SimpleXmlDom extends AbstractSimpleXmlDom implements \IteratorAggregate, S
     }
 
     /**
-     * Find one node with a CSS selector or false, if no element is found.
+     * Find one node with a CSS or xPath selector or false, if no element is found.
      *
      * @param string $selector
      *
@@ -443,7 +455,7 @@ class SimpleXmlDom extends AbstractSimpleXmlDom implements \IteratorAggregate, S
      */
     public function getElementByClass(string $class): SimpleXmlDomNodeInterface
     {
-        return $this->findMulti(".${class}");
+        return $this->findMulti(".{$class}");
     }
 
     /**
@@ -455,7 +467,7 @@ class SimpleXmlDom extends AbstractSimpleXmlDom implements \IteratorAggregate, S
      */
     public function getElementById(string $id): SimpleXmlDomInterface
     {
-        return $this->findOne("#${id}");
+        return $this->findOne("#{$id}");
     }
 
     /**
@@ -490,7 +502,7 @@ class SimpleXmlDom extends AbstractSimpleXmlDom implements \IteratorAggregate, S
      */
     public function getElementsById(string $id, $idx = null)
     {
-        return $this->find("#${id}", $idx);
+        return $this->find("#{$id}", $idx);
     }
 
     /**
@@ -555,12 +567,13 @@ class SimpleXmlDom extends AbstractSimpleXmlDom implements \IteratorAggregate, S
      * Get dom node's inner html.
      *
      * @param bool $multiDecodeNewHtmlEntity
+     * @param bool $putBrokenReplacedBack
      *
      * @return string
      */
-    public function innerHtml(bool $multiDecodeNewHtmlEntity = false): string
+    public function innerHtml(bool $multiDecodeNewHtmlEntity = false, bool $putBrokenReplacedBack = true): string
     {
-        return $this->getXmlDomParser()->innerHtml($multiDecodeNewHtmlEntity);
+        return $this->getXmlDomParser()->innerHtml($multiDecodeNewHtmlEntity, $putBrokenReplacedBack);
     }
 
     /**
@@ -659,6 +672,28 @@ class SimpleXmlDom extends AbstractSimpleXmlDom implements \IteratorAggregate, S
     }
 
     /**
+     * Returns the previous sibling of node.
+     *
+     * @return SimpleXmlDomInterface|null
+     */
+    public function previousNonWhitespaceSibling()
+    {
+        /** @var \DOMNode|null $node */
+        $node = $this->node->previousSibling;
+
+        while ($node && !\trim($node->textContent)) {
+            /** @var \DOMNode|null $node */
+            $node = $node->previousSibling;
+        }
+
+        if ($node === null) {
+            return null;
+        }
+
+        return new static($node);
+    }
+
+    /**
      * @param string|string[]|null $value <p>
      *                                    null === get the current input value
      *                                    text === set a new input value
@@ -697,7 +732,6 @@ class SimpleXmlDom extends AbstractSimpleXmlDom implements \IteratorAggregate, S
                 if ($options instanceof SimpleXmlDomNode) {
                     foreach ($options as $option) {
                         if ($this->hasAttribute('checked')) {
-                            /** @noinspection UnnecessaryCastingInspection */
                             $valuesFromDom[] = (string) $option->getAttribute('value');
                         }
                     }
@@ -778,7 +812,7 @@ class SimpleXmlDom extends AbstractSimpleXmlDom implements \IteratorAggregate, S
     private function normalizeStringForComparision($input): string
     {
         if ($input instanceof XmlDomParser) {
-            $string = $input->plaintext;
+            $string = $input->html(false, false);
         } else {
             $string = (string) $input;
         }
