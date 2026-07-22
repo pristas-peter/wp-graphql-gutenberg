@@ -40,6 +40,11 @@ class BlockTypes {
 	protected static function get_attribute_type( $name, $attribute, $prefix ) {
 		$type = null;
 
+		if ( isset( $attribute['type'] ) && is_array( $attribute['type'] ) ) {
+			// Union type (e.g. templateLock: string|boolean). Resolve using the first declared type.
+			$attribute['type'] = $attribute['type'][0] ?? null;
+		}
+
 		if ( isset( $attribute['type'] ) ) {
 			switch ( $attribute['type'] ) {
 				case 'string':
