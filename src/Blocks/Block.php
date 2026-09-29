@@ -99,14 +99,14 @@ class Block implements ArrayAccess {
 
 					break;
 				case 'attribute':
-					$source_node = $value['selector'] ? $node->findOne( $value['selector'] ) : $node;
+					$source_node = ! empty( $value['selector'] ) ? $node->findOne( $value['selector'] ) : $node;
 
 					if ( $source_node ) {
 						$result[ $key ] = $source_node->getAttribute( $value['attribute'] );
 					}
 					break;
 				case 'text':
-					$source_node = $value['selector'] ? $node->findOne( $value['selector'] ) : $node;
+					$source_node = ! empty( $value['selector'] ) ? $node->findOne( $value['selector'] ) : $node;
 
 					if ( $source_node ) {
 						$result[ $key ] = $source_node->plaintext;
