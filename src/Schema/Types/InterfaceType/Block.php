@@ -72,6 +72,9 @@ class Block {
 					'dynamicContent'       => [
 						'type'        => 'String',
 						'description' => __( 'Server side rendered content.', 'wp-graphql-gutenberg' ),
+						'resolve'     => function ( $block ) {
+							return $block->get_dynamic_content();
+						},
 					],
 					'order'                => [
 						'type' => [ 'non_null' => 'Int' ],
